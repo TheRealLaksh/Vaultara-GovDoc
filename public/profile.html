@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile - GovDocs</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="brand">🔐 GovDocs</div>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>My Citizen Profile</h2>
+        <div class="card" style="margin-top: 20px; max-width: 600px;">
+            <div style="text-align: center; padding: 20px;">
+                <div style="font-size: 4rem;">👨‍💼</div>
+                <h3 id="profilePhone">Loading...</h3>
+                <p style="color: green; font-weight: bold; margin-top: 5px;">
+                    ✔ Aadhaar Linked
+                </p>
+            </div>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            
+            <form id="profileForm">
+                <label>Full Name</label>
+                <input type="text" id="fullName" placeholder="Enter your full name">
+
+                <label>Aadhaar Number (Masked)</label>
+                <input type="text" value="XXXX-XXXX-1234" disabled style="background: #eee; cursor: not-allowed;">
+
+                <label>Family Group ID</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="familyId" value="FAMILY-7382" disabled style="background: #eee;">
+                    <button type="button" class="btn btn-secondary" onclick="alert('Family Group feature coming next!')">Manage</button>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; margin-top: 20px;">Save Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>
