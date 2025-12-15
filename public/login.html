@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - GovDocs</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav><div class="brand">🔐 GovDocs</div></nav>
+    <div class="auth-container">
+        <h2>Login / Register</h2>
+        <div id="step1">
+            <input type="tel" id="phoneNumber" placeholder="+91 9999999999">
+            
+            <br>
+            <button class="btn" onclick="sendOTP()">Get OTP</button>
+        </div>
+        <div id="step2" class="hidden">
+            <input type="text" id="otpCode" placeholder="Enter 6-digit OTP">
+            <button class="btn" onclick="verifyOTP()">Verify</button>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/logger.js"></script>
+    <script src="js/otp.js"></script>
+</body>
+</html>

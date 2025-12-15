@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="brand">🔐 GovDocs</div>
+        <ul>
+            <li><a href="upload.html">Upload</a></li>
+            <li><a href="activity.html">Activity</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h2>My Documents</h2>
+        <div style="margin: 1rem 0;">
+            <input type="text" id="searchBar" placeholder="Search..." style="width: 60%;">
+            <select id="categoryFilter" style="width: 30%;">
+                <option value="all">All</option>
+                <option value="Identity">Identity</option>
+                <option value="Education">Education</option>
+            </select>
+        </div>
+        <div id="docLoader">Loading...</div>
+        <div id="docGrid" class="grid-view"></div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/logger.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
