@@ -13,9 +13,8 @@ window.generateRandomId = () => {
 
 auth.onAuthStateChanged(async (user) => {
     if (user) {
-        // 1. Display Phone Number
-        const phone = user.email.split('@')[0];
-        if(profilePhone) profilePhone.innerText = `+91 ${phone}`;
+        // 1. Display Email (Real Identity)
+        if(profilePhone) profilePhone.innerText = user.email;
 
         // 2. Fetch existing profile data
         try {
@@ -30,8 +29,6 @@ auth.onAuthStateChanged(async (user) => {
                     familyIdInput.value = data.familyId;
                 }
             } 
-            // If no ID exists, we leave it blank so they can TYPE one to join, 
-            // or click "Generate" to create.
         } catch (error) {
             console.error("Error fetching profile:", error);
         }

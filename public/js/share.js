@@ -4,13 +4,6 @@ const docSelect = document.getElementById('docSelect');
 const shareForm = document.getElementById('shareForm');
 const statusDiv = document.getElementById('shareStatus');
 
-// Standardize Phone Helper
-function sanitizePhone(phone) {
-    let digits = phone.replace(/\D/g, ''); 
-    if (digits.length > 10) digits = digits.slice(-10);
-    return digits;
-}
-
 // 1. Load Documents
 auth.onAuthStateChanged(user => {
     if (user) {
@@ -39,22 +32,22 @@ shareForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const docId = docSelect.value;
-    const rawReceiver = document.getElementById('receiverPhone').value;
-    const cleanReceiver = sanitizePhone(rawReceiver);
+    const rawReceiver = document.getElementById('receiverEmail').value.trim(); // Changed ID
     
     if(!docId) {
         alert("Please select a document.");
         return;
     }
     
-    if(cleanReceiver.length !== 10) {
-        alert("Please enter a valid 10-digit phone number.");
+    // Basic Email Validation
+    if(!rawReceiver.includes('@') || !rawReceiver.includes('.')) {
+        alert("Please enter a valid email address.");
         return;
     }
 
     // Prevent sharing with self
-    const currentUserPhone = auth.currentUser.email.split('@')[0];
-    if(cleanReceiver === currentUserPhone) {
+    const currentUserEmail = auth.currentUser.email;
+    if(rawReceiver.toLowerCase() === currentUserEmail.toLowerCase()) {
         alert("You cannot share with yourself.");
         return;
     }
@@ -64,20 +57,20 @@ shareForm.addEventListener('submit', async (e) => {
 
     try {
         await db.collection('documents').doc(docId).update({
-            sharedWith: firebase.firestore.FieldValue.arrayUnion(cleanReceiver)
+            sharedWith: firebase.firestore.FieldValue.arrayUnion(rawReceiver)
         });
 
         if(window.Logger) {
             const docName = docSelect.options[docSelect.selectedIndex].text;
-            await Logger.log("SHARE", `Shared '${docName}' with ${cleanReceiver}`);
+            await Logger.log("SHARE", `Shared '${docName}' with ${rawReceiver}`);
         }
 
-        statusDiv.textContent = "✅ Shared Successfully with " + cleanReceiver;
+        statusDiv.textContent = "✅ Shared Successfully with " + rawReceiver;
         statusDiv.style.color = "green";
         
         setTimeout(() => {
             statusDiv.textContent = "";
-            document.getElementById('receiverPhone').value = "";
+            document.getElementById('receiverEmail').value = "";
             docSelect.value = "";
         }, 2500);
 

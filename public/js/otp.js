@@ -1,102 +1,67 @@
-// GHOST MODE: Looks like Phone Auth, acts like Email Auth
-const GHOST_PASSWORD = "Vaultara_Secret_Password_2025!";
-const GHOST_DOMAIN = "@vaultara.test";
+// AUTH HANDLER (Replaces previous OTP Logic)
 
-// HELPER: Standardize Phone to last 10 digits
-function sanitizePhone(phone) {
-    let digits = phone.replace(/\D/g, ''); // Remove non-digits
-    if (digits.length > 10) {
-        digits = digits.slice(-10); // Take last 10 (removes 91 or 0)
-    }
-    return digits;
+function toggleMode() {
+    document.getElementById('loginActions').classList.toggle('hidden');
+    document.getElementById('registerActions').classList.toggle('hidden');
+    document.getElementById('authError').innerText = "";
 }
 
-function sendOTP() {
-    const rawPhone = document.getElementById('phoneNumber').value;
-    const cleanPhone = sanitizePhone(rawPhone);
+async function handleAuth(mode) {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('authError');
+    
+    errorDiv.innerText = "";
 
-    if (cleanPhone.length !== 10) {
-        alert("Please enter a valid 10-digit phone number.");
+    if (!email || !password) {
+        errorDiv.innerText = "Please enter both email and password.";
         return;
     }
 
-    // Store the cleaned number for step 2
-    window.tempPhone = cleanPhone;
+    if (password.length < 6) {
+        errorDiv.innerText = "Password must be at least 6 characters.";
+        return;
+    }
 
-    const btn = document.querySelector('#step1 button');
-    const originalText = btn.innerText;
-    btn.innerText = "Sending...";
+    // UI Loading State
+    const btn = mode === 'login' 
+        ? document.querySelector('#loginActions button') 
+        : document.querySelector('#registerActions button');
+    
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = `<span style="color:white;">Processing...</span>`;
     btn.disabled = true;
 
-    console.log(`[SIMULATION] Sending OTP to ${cleanPhone}...`);
-
-    setTimeout(() => {
-        document.getElementById('step1').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
-        btn.innerText = originalText;
-        btn.disabled = false;
-        alert("OTP Sent! (Use 123456)");
-    }, 1500);
-}
-
-async function verifyOTP() {
-    const enteredOtp = document.getElementById('otpCode').value;
-    // Use the sanitized phone from Step 1
-    const cleanPhone = window.tempPhone || sanitizePhone(document.getElementById('phoneNumber').value);
-    
-    let statusDiv = document.getElementById('otpStatus');
-    if (!statusDiv) {
-        statusDiv = document.createElement('div');
-        statusDiv.id = 'otpStatus';
-        statusDiv.style.marginTop = "10px";
-        statusDiv.style.fontWeight = "bold";
-        document.getElementById('step2').appendChild(statusDiv);
-    }
-
-    if(enteredOtp !== "123456") {
-        alert("Invalid OTP! (Hint: Use 123456)");
-        return;
-    }
-
-    statusDiv.style.color = "blue";
-    statusDiv.innerText = "Verifying...";
-
-    // Construct Email with CLEAN 10-digit phone
-    const ghostEmail = cleanPhone + GHOST_DOMAIN;
-
     try {
-        await auth.signInWithEmailAndPassword(ghostEmail, GHOST_PASSWORD);
-        handleSuccess();
-    } catch (error) {
-        console.log("Login failed, trying registration...", error.code);
-
-        if(error.code === 'auth/invalid-login-credentials' || 
-           error.code === 'auth/user-not-found' || 
-           error.code === 'auth/invalid-credential') {
-            try {
-                statusDiv.style.color = "green";
-                statusDiv.innerText = "Creating New Account...";
-                await auth.createUserWithEmailAndPassword(ghostEmail, GHOST_PASSWORD);
-                handleSuccess();
-            } catch (createError) {
-                console.error(createError);
-                statusDiv.style.color = "red";
-                statusDiv.innerText = "Error: " + createError.message;
-            }
+        if (mode === 'login') {
+            await auth.signInWithEmailAndPassword(email, password);
+            if(window.Logger) await Logger.log("LOGIN", "User logged in securely");
         } else {
-            console.error(error);
-            statusDiv.style.color = "red";
-            statusDiv.innerText = "Error: " + error.message;
+            await auth.createUserWithEmailAndPassword(email, password);
+            // Create initial user profile doc
+            const user = auth.currentUser;
+            await db.collection('users').doc(user.uid).set({
+                email: email,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                aadhaarLinked: false
+            });
+            if(window.Logger) await Logger.log("REGISTER", "New user account created");
         }
-    }
-}
-
-function handleSuccess() {
-    if(window.Logger) {
-        Logger.log("LOGIN", "User logged in").then(() => {
-            window.location.href = "dashboard.html";
-        });
-    } else {
+        
         window.location.href = "dashboard.html";
+
+    } catch (error) {
+        console.error(error);
+        let msg = error.message;
+        
+        // Friendly Error Messages
+        if (error.code === 'auth/wrong-password') msg = "Incorrect password.";
+        if (error.code === 'auth/user-not-found') msg = "No account found with this email.";
+        if (error.code === 'auth/email-already-in-use') msg = "Email already registered. Try logging in.";
+        if (error.code === 'auth/invalid-email') msg = "Invalid email address format.";
+        
+        errorDiv.innerText = msg;
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
     }
 }

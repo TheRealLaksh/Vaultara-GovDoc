@@ -10,7 +10,8 @@ let allDocs = [];
 
 auth.onAuthStateChanged(async user => {
     if (user) {
-        const myPhone = user.email.split('@')[0];
+        // CHANGED: Use real email for sharing logic
+        const myEmail = user.email; 
         
         try {
             // 1. Get User Profile for Family ID
@@ -18,10 +19,10 @@ auth.onAuthStateChanged(async user => {
             const userDoc = await db.collection('users').doc(user.uid).get();
             if(userDoc.exists) myFamilyId = userDoc.data().familyId;
 
-            // 2. Prepare Queries
+            // 2. Prepare Queries (Using Email for sharedWith)
             const queries = [
                 db.collection('documents').where('ownerId', '==', user.uid).get(),
-                db.collection('documents').where('sharedWith', 'array-contains', myPhone).get()
+                db.collection('documents').where('sharedWith', 'array-contains', myEmail).get()
             ];
 
             // 3. Add Family Query if ID exists
@@ -40,13 +41,12 @@ auth.onAuthStateChanged(async user => {
                 familyDocs = results[2].docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'FAMILY' }));
             }
 
-            // 5. Merge & Deduplicate (Prioritize Owner > Shared > Family)
+            // 5. Merge & Deduplicate
             const combined = [...ownedDocs, ...sharedDocs, ...familyDocs];
             const uniqueMap = new Map();
             
             combined.forEach(doc => {
                 if(!uniqueMap.has(doc.id)) {
-                    // Filter out my own docs appearing in "Family" list
                     if(doc.type === 'FAMILY' && doc.ownerId === user.uid) {
                         doc.type = 'OWNER';
                     }
@@ -105,7 +105,6 @@ function renderDocs(docs) {
         if(doc.category === 'Health') icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
         if(doc.category === 'Identity') icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
 
-        // Badge Logic
         let badge = `<span class="status-badge" style="background: #f0fdf4; color: #15803d;">SECURE</span>`;
         if (doc.type === 'SHARED') badge = `<span class="status-badge" style="background: #EFF6FF; color: #1d4ed8;">SHARED IN</span>`;
         if (doc.type === 'FAMILY') badge = `<span class="status-badge" style="background: #faf5ff; color: #7e22ce;">FAMILY</span>`;
@@ -116,7 +115,6 @@ function renderDocs(docs) {
                 <span class="expandable-tab-text">Download</span>
             </a>`;
             
-        // Only owner can delete
         const deleteBtn = (doc.type === 'OWNER') 
             ? `<button onclick="deleteDoc('${doc.id}')" class="btn-tab btn-tab-danger">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>

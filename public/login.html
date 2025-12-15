@@ -12,49 +12,51 @@
         <div class="auth-card">
             <div style="text-align:center; margin-bottom: 32px;">
                 <div style="font-size: 2rem; margin-bottom: 8px;">🔐</div>
-                <h2 style="font-weight: 700;">Citizen Access</h2>
-                <p style="color: var(--gov-slate);">Verify identity to proceed</p>
+                <h2 style="font-weight: 700;">Secure Access</h2>
+                <p style="color: var(--gov-slate);">Government Document Vault</p>
             </div>
 
-            <div id="step1">
+            <form id="authForm">
                 <div class="form-group">
-                    <label>Mobile Number</label>
-                    <input type="tel" id="phoneNumber" placeholder="99999 99999" autofocus>
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="citizen@example.com" required>
                 </div>
-                
-                <button class="btn-primary-reveal" onclick="sendOTP()" style="width: 100%; max-width: 100%;">
-                    <span class="btn-text-initial">Get OTP Code</span>
-                    <div class="btn-bg-reveal"></div>
-                    <div class="btn-text-reveal">
-                        <span>Send Code</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    </div>
-                </button>
-                
-                <div style="text-align:center; margin-top:20px;">
-                    <a href="index.html" class="btn-tab" style="display:inline-flex;">Back to Home</a>
-                </div>
-            </div>
 
-            <div id="step2" class="hidden">
                 <div class="form-group">
-                    <label>Enter 6-Digit Code</label>
-                    <input type="text" id="otpCode" style="text-align:center; letter-spacing: 0.5em; font-weight: 700; font-size: 1.2rem;">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required minlength="6">
                 </div>
 
-                <button class="btn-primary-reveal" onclick="verifyOTP()" style="width: 100%; max-width: 100%;">
-                    <span class="btn-text-initial">Verify & Login</span>
-                    <div class="btn-bg-reveal"></div>
-                    <div class="btn-text-reveal">
-                        <span>Unlock Vault</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    </div>
-                </button>
-                
-                <button class="btn-tab btn-tab-danger" onclick="window.location.reload()" style="width:100%; justify-content:center; margin-top:16px;">
-                    Cancel Verification
-                </button>
-            </div>
+                <div id="authError" style="color: var(--acc-danger); font-size: 0.9rem; margin-bottom: 16px; text-align: center;"></div>
+
+                <div id="loginActions">
+                    <button type="button" class="btn-primary-reveal" onclick="handleAuth('login')">
+                        <span class="btn-text-initial">Login Securely</span>
+                        <div class="btn-bg-reveal"></div>
+                        <div class="btn-text-reveal">
+                            <span>Access Vault</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                        </div>
+                    </button>
+                    <p style="text-align:center; margin-top:16px; font-size:0.9rem;">
+                        New User? <a href="#" onclick="toggleMode()" style="color:var(--acc-primary); font-weight:600;">Create Account</a>
+                    </p>
+                </div>
+
+                <div id="registerActions" class="hidden">
+                    <button type="button" class="btn-primary-reveal" onclick="handleAuth('register')">
+                        <span class="btn-text-initial">Create Account</span>
+                        <div class="btn-bg-reveal"></div>
+                        <div class="btn-text-reveal">
+                            <span>Register Now</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        </div>
+                    </button>
+                    <p style="text-align:center; margin-top:16px; font-size:0.9rem;">
+                        Has Account? <a href="#" onclick="toggleMode()" style="color:var(--acc-primary); font-weight:600;">Login Here</a>
+                    </p>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -63,6 +65,5 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/logger.js"></script>
-    <script src="js/otp.js"></script>
-</body>
+    <script src="js/otp.js"></script> </body>
 </html>
