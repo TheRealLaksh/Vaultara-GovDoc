@@ -8,32 +8,66 @@ const docCountDisplay = document.getElementById('docCountDisplay');
 
 let allDocs = [];
 
-// Fetch logic remains identical
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(async user => {
     if (user) {
         const myPhone = user.email.split('@')[0];
-        const ownQuery = db.collection('documents').where('ownerId', '==', user.uid).get();
-        const sharedQuery = db.collection('documents').where('sharedWith', 'array-contains', myPhone).get();
+        
+        try {
+            // 1. Get User Profile for Family ID
+            let myFamilyId = null;
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if(userDoc.exists) myFamilyId = userDoc.data().familyId;
 
-        Promise.all([ownQuery, sharedQuery])
-            .then(results => {
-                const ownedDocs = results[0].docs.map(doc => ({ id: doc.id, ...doc.data(), isShared: false }));
-                const sharedDocs = results[1].docs.map(doc => ({ id: doc.id, ...doc.data(), isShared: true }));
-                
-                allDocs = [...ownedDocs, ...sharedDocs].sort((a,b) => {
-                    const dateA = a.createdAt ? a.createdAt.toMillis() : 0;
-                    const dateB = b.createdAt ? b.createdAt.toMillis() : 0;
-                    return dateB - dateA;
-                });
-                
-                renderDocs(allDocs);
-                if(loader) loader.classList.add('hidden');
-                if(docCountDisplay) docCountDisplay.innerText = allDocs.length;
-            })
-            .catch(error => {
-                console.error("Error loading docs:", error);
-                if(loader) loader.innerHTML = "<p>Error loading documents.</p>";
+            // 2. Prepare Queries
+            const queries = [
+                db.collection('documents').where('ownerId', '==', user.uid).get(),
+                db.collection('documents').where('sharedWith', 'array-contains', myPhone).get()
+            ];
+
+            // 3. Add Family Query if ID exists
+            if(myFamilyId) {
+                queries.push(db.collection('documents').where('familyId', '==', myFamilyId).get());
+            }
+
+            // 4. Execute All
+            const results = await Promise.all(queries);
+
+            const ownedDocs = results[0].docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'OWNER' }));
+            const sharedDocs = results[1].docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'SHARED' }));
+            
+            let familyDocs = [];
+            if(results[2]) {
+                familyDocs = results[2].docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'FAMILY' }));
+            }
+
+            // 5. Merge & Deduplicate (Prioritize Owner > Shared > Family)
+            const combined = [...ownedDocs, ...sharedDocs, ...familyDocs];
+            const uniqueMap = new Map();
+            
+            combined.forEach(doc => {
+                if(!uniqueMap.has(doc.id)) {
+                    // Filter out my own docs appearing in "Family" list
+                    if(doc.type === 'FAMILY' && doc.ownerId === user.uid) {
+                        doc.type = 'OWNER';
+                    }
+                    uniqueMap.set(doc.id, doc);
+                }
             });
+
+            allDocs = Array.from(uniqueMap.values()).sort((a,b) => {
+                const dateA = a.createdAt ? a.createdAt.toMillis() : 0;
+                const dateB = b.createdAt ? b.createdAt.toMillis() : 0;
+                return dateB - dateA;
+            });
+            
+            renderDocs(allDocs);
+            if(loader) loader.classList.add('hidden');
+            if(docCountDisplay) docCountDisplay.innerText = allDocs.length;
+
+        } catch (error) {
+            console.error("Error loading docs:", error);
+            if(loader) loader.innerHTML = "<p>Error syncing vault.</p>";
+        }
     }
 });
 
@@ -63,28 +97,27 @@ function renderDocs(docs) {
 
     docs.forEach(doc => {
         const div = document.createElement('div');
-        div.className = 'ui-card anim-stagger-' + ((delayCounter++ % 3) + 1); // Animation 18-20
+        div.className = 'ui-card anim-stagger-' + ((delayCounter++ % 3) + 1);
         
         const dateStr = doc.createdAt ? formatDate(doc.createdAt) : 'Processing...';
         
-        // Icon logic based on category
         let icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
         if(doc.category === 'Health') icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
         if(doc.category === 'Identity') icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
 
-        // Shared Badge
-        const badge = doc.isShared 
-            ? `<span class="status-badge" style="background: #EFF6FF; color: #1d4ed8;">SHARED IN</span>` 
-            : `<span class="status-badge" style="background: #f0fdf4; color: #15803d;">SECURE</span>`;
+        // Badge Logic
+        let badge = `<span class="status-badge" style="background: #f0fdf4; color: #15803d;">SECURE</span>`;
+        if (doc.type === 'SHARED') badge = `<span class="status-badge" style="background: #EFF6FF; color: #1d4ed8;">SHARED IN</span>`;
+        if (doc.type === 'FAMILY') badge = `<span class="status-badge" style="background: #faf5ff; color: #7e22ce;">FAMILY</span>`;
 
-        // Buttons using Type A (Tab)
         const downloadBtn = `
             <a href="${doc.fileData}" download="${doc.fileName}" class="btn-tab">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 <span class="expandable-tab-text">Download</span>
             </a>`;
             
-        const deleteBtn = !doc.isShared 
+        // Only owner can delete
+        const deleteBtn = (doc.type === 'OWNER') 
             ? `<button onclick="deleteDoc('${doc.id}')" class="btn-tab btn-tab-danger">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 <span class="expandable-tab-text">Delete</span>

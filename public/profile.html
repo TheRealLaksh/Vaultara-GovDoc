@@ -31,12 +31,18 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Family ID (Share this code to link family)</label>
-                        <input type="text" id="familyId" placeholder="Loading ID..." 
-                               style="font-family: monospace; letter-spacing: 0.1em; font-weight: 700; color: var(--gov-navy); background: #f8fafc;" 
-                               maxlength="10">
+                        <label>Family ID (Link Accounts)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="familyId" placeholder="Enter Code to Join Family" 
+                                   style="font-family: monospace; letter-spacing: 0.1em; font-weight: 700; color: var(--gov-navy); background: #f8fafc; text-transform: uppercase;" 
+                                   maxlength="10">
+                            <button type="button" onclick="generateRandomId()" class="btn-tab" style="white-space: nowrap; border: 1px solid var(--gov-silver);">
+                                Generate New
+                            </button>
+                        </div>
                         <p style="font-size: 0.75rem; color: var(--gov-slate); margin-top: 6px;">
-                            This code identifies your family vault. Share it securely.
+                            <strong>To Link:</strong> Enter the same Family ID as your family members. <br>
+                            <strong>To Create:</strong> Click "Generate New" and share the code.
                         </p>
                     </div>
 

@@ -10,7 +10,6 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
 
     if (!file) return;
 
-    // SECURITY: Limit file size to 500KB (Safe limit for Firestore Documents)
     if (file.size > 500 * 1024) {
         alert("⚠️ File too large! Please upload files smaller than 500KB.");
         statusDiv.textContent = "Error: File exceeds 500KB limit.";
@@ -20,24 +19,30 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
 
     statusDiv.textContent = "Encrypting & Processing...";
 
-    // Convert File to Base64 String
     const reader = new FileReader();
     
     reader.onload = async function(event) {
         const base64String = event.target.result;
 
         try {
-            // Save directly to Firestore
+            // 1. Fetch User Profile to get Family ID
+            let myFamilyId = null;
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if(userDoc.exists && userDoc.data().familyId) {
+                myFamilyId = userDoc.data().familyId;
+            }
+
+            // 2. Save Document with Family ID tag
             await db.collection('documents').add({
                 ownerId: user.uid,
+                familyId: myFamilyId, // <--- New Field for Linking
                 fileName: title,
                 category: category,
                 fileType: file.type,
-                fileData: base64String, // The file is saved here as text
+                fileData: base64String,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            // Log the action
             if(window.Logger) {
                 await Logger.log("UPLOAD", `Uploaded ${title} (${category})`);
             }
@@ -57,5 +62,5 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         statusDiv.textContent = "Error reading file.";
     };
 
-    reader.readAsDataURL(file); // Starts the conversion
+    reader.readAsDataURL(file);
 });
