@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GovDocs Secure</title>
+    <title>Vaultara Secure</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <nav>
-        <div class="brand">🔐 GovDocs</div>
-        <ul id="navLinks"></ul>
-    </nav>
-    <div class="container" style="text-align: center; margin-top: 4rem;">
-        <h1>Secure Government Document Vault</h1>
-        <p>Store Aadhaar, PAN, and Marksheets securely.</p>
-        <br>
-        <a href="login.html" class="btn">Login / Register</a>
+<body style="display:flex; flex-direction:column; height:100vh; justify-content:center; align-items:center; text-align:center;">
+    
+    <div class="container" style="margin:0;">
+        <h1 style="margin-bottom: 16px;">Vaultara</h1>
+        <p style="margin-bottom: 32px; font-size: 1.2rem; color: var(--gov-graphite);">
+            Secure & Share Government Documents with Family.
+        </p>
+        
+        <a href="login.html" class="btn-pill" style="width: auto; padding-left: 40px; padding-right: 40px;">
+            Login / Register
+        </a>
     </div>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
     <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
 </body>
 </html>

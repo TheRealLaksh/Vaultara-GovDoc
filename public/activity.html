@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Activity Log</title>
+    <title>Activity | Vaultara</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <nav>
-        <div class="brand">🔐 GovDocs</div>
-        <ul><li><a href="dashboard.html">Back</a></li>
-        <li><a href="profile.html">Profile</a></li></ul>
+    <nav class="app-nav">
+        <div class="nav-brand">🔐 Vaultara</div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html" class="btn-tab">Back</a></li>
+        </ul>
     </nav>
     <div class="container">
         <h2>Activity Logs</h2>
         <div class="card">
-            <table style="width:100%; text-align:left;">
-                <thead><tr><th>Time</th><th>Action</th><th>Details</th></tr></thead>
+            <table style="width:100%; text-align:left; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--gov-silver);">
+                        <th style="padding:12px;">Time</th>
+                        <th style="padding:12px;">Action</th>
+                        <th style="padding:12px;">Details</th>
+                    </tr>
+                </thead>
                 <tbody id="logTableBody"></tbody>
             </table>
         </div>

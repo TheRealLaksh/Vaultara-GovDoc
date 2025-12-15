@@ -1,6 +1,6 @@
 // GHOST MODE: Looks like Phone Auth, acts like Email Auth
-const GHOST_PASSWORD = "GovDocs_Secret_Password_2025!";
-const GHOST_DOMAIN = "@govdocs.test";
+const GHOST_PASSWORD = "Vaultara_Secret_Password_2025!";
+const GHOST_DOMAIN = "@vaultara.test";
 
 // HELPER: Standardize Phone to last 10 digits
 function sanitizePhone(phone) {

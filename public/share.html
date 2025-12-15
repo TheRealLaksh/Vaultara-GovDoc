@@ -2,44 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Share Documents - GovDocs</title>
+    <title>Share Access | Vaultara</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <nav>
-        <div class="brand">🔐 GovDocs</div>
-        <ul>
-            <li><a href="dashboard.html">Dashboard</a></li>
-            <li><a href="profile.html">Profile</a></li>
-            <li><a href="#" onclick="logout()">Logout</a></li>
+    <nav class="app-nav">
+        <div class="nav-brand">🔐 Vaultara</div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html" class="btn-tab">Back</a></li>
         </ul>
     </nav>
 
-    <div class="auth-container" style="max-width: 600px;">
-        <h2>👨‍👩‍👧 Family Sharing</h2>
-        <p>Grant secure access to your documents.</p>
-        <br>
-        
+    <div class="auth-container">
+        <h2>Family Sharing</h2>
         <form id="shareForm">
-            <label>Select Document to Share</label>
-            <select id="docSelect" required>
-                <option value="">Loading your documents...</option>
-            </select>
-
-            <label>Receiver's Phone Number</label>
-            <input type="tel" id="receiverPhone" placeholder="e.g. 9876543210" required>
-            <p style="font-size: 0.8rem; color: #666;">* They must have a GovDocs account with this number.</p>
-
-            <div id="shareStatus" class="mt-2 text-center" style="font-weight: bold;"></div>
+            <label>Select Document</label>
+            <select id="docSelect" required><option>Loading...</option></select>
             
-            <button type="submit" class="btn" style="width: 100%; margin-top: 15px;">Grant Access</button>
+            <label>Receiver Mobile</label>
+            <input type="tel" id="receiverPhone" placeholder="10-digit number" required>
+            <p style="font-size: 0.8rem; color: var(--gov-slate); margin-bottom: 16px;">
+                * Receiver must have a Vaultara account.
+            </p>
+            
+            <div id="shareStatus" style="margin-bottom: 16px; font-weight: 600;"></div>
+            
+            <button type="submit" class="btn-pill">
+                Grant Access
+            </button>
         </form>
     </div>
-
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    
     <script src="js/firebase-config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/logger.js"></script>

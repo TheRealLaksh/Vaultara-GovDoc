@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload</title>
+    <title>Upload | Vaultara</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <nav>
-        <div class="brand">🔐 GovDocs</div>
-        <ul><li><a href="dashboard.html">Back</a></li>
-        <li><a href="profile.html">Profile</a></li></ul>
+    <nav class="app-nav">
+        <div class="nav-brand">🔐 Vaultara</div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html" class="btn-tab">Back</a></li>
+        </ul>
     </nav>
-    <div class="auth-container" style="max-width: 500px;">
+
+    <div class="auth-container">
         <h2>Upload Document</h2>
         <form id="uploadForm">
             <label>Title</label>
@@ -23,10 +25,16 @@
             </select>
             <label>File (Max 500KB)</label>
             <input type="file" id="fileInput" required accept="image/*,application/pdf">
-            <div id="uploadStatus"></div>
-            <button type="submit" class="btn">Upload</button>
+            
+            <div id="uploadStatus" style="margin-bottom: 16px;"></div>
+            
+            <button type="submit" class="btn-pill">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload Securely
+            </button>
         </form>
     </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>

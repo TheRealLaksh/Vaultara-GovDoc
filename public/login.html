@@ -3,44 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Login | GovDocs</title>
+    <title>Login | Vaultara</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body style="display: flex; flex-direction: column; min-height: 100vh;">
+<body style="display:flex; flex-direction:column; min-height:100vh;">
     
-    <nav class="app-nav" style="justify-content: center;">
-        <div class="nav-brand">🔐 GovDocs <span style="font-weight:400; margin-left:8px;">| Secure Login</span></div>
+    <nav class="app-nav" style="justify-content:center;">
+        <div class="nav-brand">🔐 Vaultara Login</div>
     </nav>
 
-    <div class="auth-container">
-        <div style="text-align: center; margin-bottom: 24px;">
-            <div style="font-size: 3rem; margin-bottom: 16px;">🏛️</div>
+    <div class="auth-container" style="max-width: 400px; margin: 4rem auto;">
+        <div style="text-align:center; margin-bottom: 24px;">
             <h2>Citizen Access</h2>
-            <p>Enter your credentials to access the vault.</p>
+            <p>Secure Government Vault</p>
         </div>
 
         <div id="step1">
-            <label for="phoneNumber">Mobile Number</label>
-            <input type="tel" id="phoneNumber" placeholder="e.g. 99999 99999" autofocus>
-            <button class="btn" style="width: 100%;" onclick="sendOTP()">Request One-Time Password</button>
-            <p style="margin-top: 16px; font-size: 0.8rem; text-align: center; color: var(--gov-slate);">
-                By continuing, you agree to the Terms of Service.
-            </p>
+            <label>Mobile Number</label>
+            <input type="tel" id="phoneNumber" placeholder="99999 99999">
+            <button class="btn-pill" onclick="sendOTP()">
+                Get OTP Code &rarr;
+            </button>
         </div>
 
         <div id="step2" class="hidden">
-            <div style="background: #EFF6FF; color: #1E40AF; padding: 12px; font-size: 0.9rem; margin-bottom: 16px; border-radius: 4px;">
-                ✓ OTP sent to your mobile.
-            </div>
-            <label for="otpCode">6-Digit OTP</label>
-            <input type="text" id="otpCode" placeholder="000 000" style="letter-spacing: 0.2em; font-weight: bold; text-align: center;">
-            <button class="btn" style="width: 100%;" onclick="verifyOTP()">Verify Identity</button>
-            <button class="btn btn-secondary" style="width: 100%; margin-top: 8px;" onclick="window.location.reload()">Cancel</button>
+            <label>Enter 6-Digit OTP</label>
+            <input type="text" id="otpCode" style="text-align:center; letter-spacing:4px; font-weight:bold;">
+            <button class="btn-pill" onclick="verifyOTP()">
+                Verify Identity
+            </button>
+            <button class="btn-tab" style="width:100%; justify-content:center; margin-top:12px;" onclick="window.location.reload()">
+                Cancel
+            </button>
         </div>
-    </div>
-
-    <div style="margin-top: auto; padding: 24px; text-align: center; color: var(--gov-slate); font-size: 0.8rem; background: var(--gov-surface); border-top: 1px solid var(--gov-silver);">
-        🔒 256-bit Encryption &nbsp;&bull;&nbsp; Government Standard &nbsp;&bull;&nbsp; 24/7 Monitoring
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
