@@ -1,22 +1,34 @@
-// GHOST MODE: Looks like Phone Auth, acts like Email Auth (Free Tier Compatible)
+// GHOST MODE: Looks like Phone Auth, acts like Email Auth
 const GHOST_PASSWORD = "GovDocs_Secret_Password_2025!";
 const GHOST_DOMAIN = "@govdocs.test";
 
-// Step 1: "Send" OTP (Simulation)
+// HELPER: Standardize Phone to last 10 digits
+function sanitizePhone(phone) {
+    let digits = phone.replace(/\D/g, ''); // Remove non-digits
+    if (digits.length > 10) {
+        digits = digits.slice(-10); // Take last 10 (removes 91 or 0)
+    }
+    return digits;
+}
+
 function sendOTP() {
-    const phoneNumber = document.getElementById('phoneNumber').value;
-    
-    if(!phoneNumber || phoneNumber.length < 10) {
-        alert("Please enter a valid phone number");
+    const rawPhone = document.getElementById('phoneNumber').value;
+    const cleanPhone = sanitizePhone(rawPhone);
+
+    if (cleanPhone.length !== 10) {
+        alert("Please enter a valid 10-digit phone number.");
         return;
     }
+
+    // Store the cleaned number for step 2
+    window.tempPhone = cleanPhone;
 
     const btn = document.querySelector('#step1 button');
     const originalText = btn.innerText;
     btn.innerText = "Sending...";
     btn.disabled = true;
 
-    console.log(`[SIMULATION] Pretending to send OTP to ${phoneNumber}...`);
+    console.log(`[SIMULATION] Sending OTP to ${cleanPhone}...`);
 
     setTimeout(() => {
         document.getElementById('step1').classList.add('hidden');
@@ -27,12 +39,11 @@ function sendOTP() {
     }, 1500);
 }
 
-// Step 2: Verify OTP & Login
 async function verifyOTP() {
     const enteredOtp = document.getElementById('otpCode').value;
-    const phoneNumber = document.getElementById('phoneNumber').value;
+    // Use the sanitized phone from Step 1
+    const cleanPhone = window.tempPhone || sanitizePhone(document.getElementById('phoneNumber').value);
     
-    // Create a status element to show what's happening
     let statusDiv = document.getElementById('otpStatus');
     if (!statusDiv) {
         statusDiv = document.createElement('div');
@@ -42,43 +53,35 @@ async function verifyOTP() {
         document.getElementById('step2').appendChild(statusDiv);
     }
 
-    // 1. Verify the "Fake" OTP
     if(enteredOtp !== "123456") {
         alert("Invalid OTP! (Hint: Use 123456)");
         return;
     }
 
     statusDiv.style.color = "blue";
-    statusDiv.innerText = "Verifying & Logging in...";
+    statusDiv.innerText = "Verifying...";
 
-    // 2. Construct the Ghost Email
-    const ghostEmail = phoneNumber.replace(/[^0-9]/g, '') + GHOST_DOMAIN;
+    // Construct Email with CLEAN 10-digit phone
+    const ghostEmail = cleanPhone + GHOST_DOMAIN;
 
     try {
-        // 3. Attempt to Login
         await auth.signInWithEmailAndPassword(ghostEmail, GHOST_PASSWORD);
         handleSuccess();
-
     } catch (error) {
-        console.log("Login failed, checking if registration is needed...", error.code);
+        console.log("Login failed, trying registration...", error.code);
 
-        // 4. CATCH THE ERROR SHOWN IN YOUR SCREENSHOT
         if(error.code === 'auth/invalid-login-credentials' || 
            error.code === 'auth/user-not-found' || 
            error.code === 'auth/invalid-credential') {
-            
             try {
                 statusDiv.style.color = "green";
-                statusDiv.innerText = "First time user? Creating Account...";
-                
-                // REGISTER the new user automatically
+                statusDiv.innerText = "Creating New Account...";
                 await auth.createUserWithEmailAndPassword(ghostEmail, GHOST_PASSWORD);
                 handleSuccess();
-                
             } catch (createError) {
                 console.error(createError);
                 statusDiv.style.color = "red";
-                statusDiv.innerText = "Registration Failed: " + createError.message;
+                statusDiv.innerText = "Error: " + createError.message;
             }
         } else {
             console.error(error);
@@ -90,8 +93,7 @@ async function verifyOTP() {
 
 function handleSuccess() {
     if(window.Logger) {
-        // Log it as a "Phone" login to keep the illusion
-        Logger.log("LOGIN", "User logged in via Phone OTP").then(() => {
+        Logger.log("LOGIN", "User logged in").then(() => {
             window.location.href = "dashboard.html";
         });
     } else {
