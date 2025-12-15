@@ -1,26 +1,276 @@
+/* ==========================================================================
+   1. INSTITUTIONAL FOUNDATION (Variables & Reset)
+   ========================================================================== */
 :root {
-    --primary: #2C5F2D;
-    --secondary: #97BC62;
-    --bg-color: #F0F4E8;
-    --card-bg: #FFFFFF;
-    --text-main: #333333;
-    --radius: 12px;
+    /* Palette: Authority & Calm */
+    --gov-navy: #1B2A41;       /* Deep Institutional Navy */
+    --gov-navy-light: #2C3E50; /* Interactive State */
+    --gov-graphite: #475569;   /* High-readability Text */
+    --gov-slate: #94A3B8;      /* Secondary Text */
+    --gov-silver: #E2E8F0;     /* Structural Borders */
+    --gov-surface: #FFFFFF;    /* Pure White Surface */
+    --gov-canvas: #F8F9FA;     /* Warm Off-White Background */
+    
+    /* State Colors (Functional only) */
+    --state-success: #059669;  /* Verified/Safe */
+    --state-danger: #BE123C;   /* Destructive */
+    --state-focus: #2563EB;    /* Accessibility Focus */
+
+    /* Spacing System */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 48px;
+
+    /* Architecture */
+    --radius-soft: 6px;        /* Minimal rounding */
+    --shadow-depth: 0 1px 3px rgba(0,0,0,0.05); /* Desktop only */
+    --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-body { background: var(--bg-color); color: var(--text-main); line-height: 1.6; }
 
-nav { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-nav ul { list-style: none; display: flex; gap: 20px; }
-nav a { color: white; text-decoration: none; }
+* { box-sizing: border-box; margin: 0; padding: 0; outline-color: var(--state-focus); }
 
-.container { max-width: 1000px; margin: 2rem auto; padding: 0 20px; }
-.card { background: var(--card-bg); padding: 1.5rem; border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-.btn { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-block;}
-.btn-secondary { background: var(--secondary); color: #000; }
-.btn-danger { background: #D9534F; }
+body {
+    background-color: var(--gov-canvas);
+    color: var(--gov-navy);
+    font-family: var(--font-stack);
+    line-height: 1.5;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+}
 
-input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
-.hidden { display: none; }
-.grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-.auth-container { max-width: 400px; margin: 4rem auto; background: white; padding: 2rem; border-radius: 12px; text-align: center; }
-.doc-icon { font-size: 2rem; color: var(--primary); }
+/* ==========================================================================
+   2. TYPOGRAPHY (Hierarchy & Discipline)
+   ========================================================================== */
+h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; color: var(--gov-navy); }
+h1 { font-size: 2.5rem; line-height: 1.1; margin-bottom: var(--space-lg); }
+h2 { font-size: 1.75rem; margin-bottom: var(--space-md); }
+h3 { font-size: 1.1rem; font-weight: 600; }
+p { color: var(--gov-graphite); margin-bottom: var(--space-md); }
+small { color: var(--gov-slate); font-size: 0.85rem; }
+
+/* ==========================================================================
+   3. COMPONENT: FORMS (Secure & Deliberate)
+   ========================================================================== */
+input, select {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: var(--space-md);
+    border: 1px solid var(--gov-silver);
+    border-radius: var(--radius-soft);
+    background: var(--gov-surface);
+    font-size: 1rem;
+    color: var(--gov-navy);
+    transition: border-color 0.2s ease;
+}
+
+input:focus, select:focus {
+    border-color: var(--gov-navy);
+    box-shadow: 0 0 0 3px rgba(27, 42, 65, 0.1);
+}
+
+label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+    color: var(--gov-graphite);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ==========================================================================
+   4. COMPONENT: BUTTONS (Actions)
+   ========================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    background: var(--gov-navy);
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-soft);
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: background 0.2s ease;
+}
+.btn:hover { background: var(--gov-navy-light); }
+.btn-secondary { background: white; border: 1px solid var(--gov-silver); color: var(--gov-navy); }
+.btn-secondary:hover { background: var(--gov-canvas); }
+.btn-danger { background: white; border: 1px solid var(--gov-silver); color: var(--state-danger); }
+.btn-danger:hover { background: #FEF2F2; border-color: var(--state-danger); }
+
+/* ==========================================================================
+   5. LAYOUT: DESKTOP ("Control Room")
+   ========================================================================== */
+@media (min-width: 769px) {
+    /* Persistent Top Nav */
+    .app-nav {
+        background: var(--gov-navy);
+        height: 64px;
+        padding: 0 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .nav-brand { font-size: 1.25rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 8px; }
+    
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+    .nav-links a:hover { color: white; }
+
+    .main-layout {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 24px;
+        display: grid;
+        grid-template-columns: 240px 1fr; /* Sidebar + Content */
+        gap: 40px;
+    }
+
+    .controls-bar {
+        display: flex;
+        gap: 16px;
+        background: var(--gov-surface);
+        padding: 16px;
+        border: 1px solid var(--gov-silver);
+        border-radius: var(--radius-soft);
+        margin-bottom: 24px;
+        align-items: center;
+    }
+
+    .grid-view {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+    }
+
+    /* Card: Dense Information */
+    .card {
+        background: var(--gov-surface);
+        border: 1px solid var(--gov-silver);
+        border-radius: var(--radius-soft);
+        padding: 24px;
+        position: relative;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-depth); border-color: #CBD5E1; }
+    
+    .mobile-only { display: none !important; }
+}
+
+/* ==========================================================================
+   6. LAYOUT: MOBILE ("Secure Utility")
+   ========================================================================== */
+@media (max-width: 768px) {
+    body { padding-bottom: 80px; } /* Space for bottom nav */
+
+    .app-nav {
+        background: var(--gov-surface);
+        padding: 16px;
+        border-bottom: 1px solid var(--gov-silver);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+    
+    .nav-brand { color: var(--gov-navy); font-weight: 800; font-size: 1.1rem; }
+    
+    /* Bottom Navigation Bar */
+    .nav-links {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        background: white;
+        border-top: 1px solid var(--gov-silver);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        z-index: 1000;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    }
+
+    .nav-links li { flex: 1; text-align: center; }
+    .nav-links a {
+        font-size: 0.7rem;
+        color: var(--gov-slate);
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-weight: 600;
+    }
+    .nav-links a.active { color: var(--gov-navy); }
+
+    .main-layout { padding: 16px; display: block; }
+    .sidebar { display: none; } /* Hide sidebar on mobile */
+
+    /* Controls: Stacked & Full Width */
+    .controls-bar { margin-bottom: 24px; }
+    #searchBar, #categoryFilter { margin-bottom: 12px; }
+
+    /* Card: Linear List View */
+    .grid-view { display: flex; flex-direction: column; gap: 12px; }
+    
+    .card {
+        background: var(--gov-surface);
+        border: 1px solid var(--gov-silver); /* No shadow, just structure */
+        border-radius: var(--radius-soft);
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .card-content { flex: 1; }
+    .card-actions { width: 100%; margin-top: 12px; display: flex; gap: 8px; }
+    .card .btn { flex: 1; padding: 10px; font-size: 0.9rem; }
+    
+    .desktop-only { display: none !important; }
+}
+
+/* ==========================================================================
+   7. UTILITIES & STATES
+   ========================================================================== */
+.hidden { display: none !important; }
+.auth-container {
+    max-width: 440px;
+    margin: 80px auto 20px;
+    background: var(--gov-surface);
+    padding: 40px;
+    border: 1px solid var(--gov-silver);
+    border-radius: var(--radius-soft);
+}
+@media (max-width: 768px) {
+    .auth-container { margin: 20px 0 0; border: none; background: transparent; padding: 20px; }
+}
+
+/* Badge Styles */
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--gov-silver);
+    color: var(--gov-graphite);
+    letter-spacing: 0.05em;
+}
+.tag-shared { background: #EFF6FF; color: #1E40AF; }

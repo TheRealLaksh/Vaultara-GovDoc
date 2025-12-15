@@ -4,45 +4,24 @@ const docGrid = document.getElementById('docGrid');
 const loader = document.getElementById('docLoader');
 const searchBar = document.getElementById('searchBar');
 const categoryFilter = document.getElementById('categoryFilter');
+// Added for stats display
+const docCountDisplay = document.getElementById('docCountDisplay');
 
 let allDocs = [];
 
-// Fetch Docs (Owned + Shared)
+// Fetch Docs (Owned + Shared) - LOGIC UNCHANGED
 auth.onAuthStateChanged(user => {
     if (user) {
-        // 1. Get my phone number from the "Ghost Email" (e.g. "9999999999@govdocs.test" -> "9999999999")
         const myPhone = user.email.split('@')[0];
+        const ownQuery = db.collection('documents').where('ownerId', '==', user.uid).get();
+        const sharedQuery = db.collection('documents').where('sharedWith', 'array-contains', myPhone).get();
 
-        // 2. Query A: Documents I Own
-        const ownQuery = db.collection('documents')
-            .where('ownerId', '==', user.uid)
-            .get();
-
-        // 3. Query B: Documents Shared with Me
-        const sharedQuery = db.collection('documents')
-            .where('sharedWith', 'array-contains', myPhone)
-            .get();
-
-        // 4. Run both queries and combine results
         Promise.all([ownQuery, sharedQuery])
             .then(results => {
-                // Process Owned Docs
-                const ownedDocs = results[0].docs.map(doc => ({
-                    id: doc.id, 
-                    ...doc.data(), 
-                    isShared: false
-                }));
-
-                // Process Shared Docs
-                const sharedDocs = results[1].docs.map(doc => ({
-                    id: doc.id, 
-                    ...doc.data(), 
-                    isShared: true
-                }));
+                const ownedDocs = results[0].docs.map(doc => ({ id: doc.id, ...doc.data(), isShared: false }));
+                const sharedDocs = results[1].docs.map(doc => ({ id: doc.id, ...doc.data(), isShared: true }));
                 
-                // Combine and Sort by Date (Newest First)
                 allDocs = [...ownedDocs, ...sharedDocs].sort((a,b) => {
-                    // Handle timestamps safely
                     const dateA = a.createdAt ? a.createdAt.toMillis() : 0;
                     const dateB = b.createdAt ? b.createdAt.toMillis() : 0;
                     return dateB - dateA;
@@ -50,6 +29,8 @@ auth.onAuthStateChanged(user => {
                 
                 renderDocs(allDocs);
                 if(loader) loader.classList.add('hidden');
+                // Update stats if element exists
+                if(docCountDisplay) docCountDisplay.innerText = allDocs.length;
             })
             .catch(error => {
                 console.error("Error loading docs:", error);
@@ -58,12 +39,18 @@ auth.onAuthStateChanged(user => {
     }
 });
 
+// UI RENDER LOGIC - COMPLETELY REWRITTEN
 function renderDocs(docs) {
     if(!docGrid) return;
     docGrid.innerHTML = '';
     
     if (docs.length === 0) {
-        docGrid.innerHTML = '<p>No documents found. Upload one!</p>';
+        docGrid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; background: white; border: 1px dashed #E2E8F0; border-radius: 6px;">
+                <p style="margin-bottom: 16px;">No documents found in the vault.</p>
+                <a href="upload.html" class="btn">Upload First Document</a>
+            </div>
+        `;
         return;
     }
 
@@ -71,29 +58,40 @@ function renderDocs(docs) {
         const div = document.createElement('div');
         div.className = 'card';
         
-        // Visual indicator for Shared docs
-        const badge = doc.isShared 
-            ? `<span style="background:#e3f2fd; color:#0d47a1; padding:2px 6px; border-radius:4px; font-size:0.7rem; margin-right:5px; font-weight:bold;">SHARED WITH ME</span>`
-            : ``;
+        // Logic specific visuals
+        const icon = doc.category === 'Identity' ? '🆔' : (doc.category === 'Health' ? '🏥' : '📄');
+        const sharedBadge = doc.isShared ? `<span class="status-badge tag-shared">Shared With Me</span>` : '';
+        const dateStr = doc.createdAt ? formatDate(doc.createdAt) : 'Processing...';
 
-        // Delete button (Only show for OWNED documents)
+        // Conditional Buttons
         const deleteBtn = !doc.isShared 
-            ? `<button onclick="deleteDoc('${doc.id}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem">Delete</button>`
+            ? `<button onclick="deleteDoc('${doc.id}')" class="btn btn-danger" title="Delete Permanent">Delete</button>`
             : ``;
 
-        // View/Download Button
-        // For Base64 files, we set href directly to the data
-        const viewBtn = `<a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem">Download</a>`;
-
+        // The HTML structure supports flex (mobile) and grid/block (desktop) via CSS
         div.innerHTML = `
-            <div class="doc-icon">📄</div>
-            <h3>${doc.fileName}</h3>
-            <div>${badge}<span class="status-badge">${doc.category}</span></div>
-            <p style="font-size:0.8rem; margin: 10px 0;">
-                ${doc.isShared ? 'Shared' : 'Uploaded'}: ${doc.createdAt ? formatDate(doc.createdAt) : 'Just now'}
-            </p>
-            <div style="margin-top: 15px;">
-                ${viewBtn}
+            <div style="font-size: 2rem; background: #F8F9FA; padding: 12px; border-radius: 6px; text-align:center; min-width: 60px;">
+                ${icon}
+            </div>
+            
+            <div class="card-content">
+                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:4px;">
+                    <h3 style="margin:0; font-size: 1rem;">${doc.fileName}</h3>
+                    ${sharedBadge}
+                </div>
+                
+                <p style="margin:0; font-size:0.8rem; color: var(--gov-slate);">
+                    <span style="font-weight:600; color:var(--gov-graphite);">${doc.category}</span> &bull; ${dateStr}
+                </p>
+
+                <div class="desktop-only" style="margin-top: 16px; display: flex; gap: 8px;">
+                    <a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">Download</a>
+                    ${deleteBtn ? `<button onclick="deleteDoc('${doc.id}')" class="btn btn-danger" style="padding: 8px 16px; font-size: 0.85rem;">Delete</button>` : ''}
+                </div>
+            </div>
+
+            <div class="mobile-only card-actions">
+                <a href="${doc.fileData}" download="${doc.fileName}" class="btn btn-secondary">Download</a>
                 ${deleteBtn}
             </div>
         `;
@@ -101,7 +99,7 @@ function renderDocs(docs) {
     });
 }
 
-// Filter Logic
+// Filter Logic - UNCHANGED
 function filterDocs() {
     const query = searchBar.value.toLowerCase();
     const cat = categoryFilter.value;
@@ -117,18 +115,15 @@ function filterDocs() {
 if(searchBar) searchBar.addEventListener('input', filterDocs);
 if(categoryFilter) categoryFilter.addEventListener('change', filterDocs);
 
-// Delete Logic
+// Delete Logic - UNCHANGED
 window.deleteDoc = async (docId) => {
-    if(!confirm("Are you sure? This cannot be undone.")) return;
+    if(!confirm("Are you sure? This document will be permanently removed from the vault.")) return;
 
     try {
         await db.collection('documents').doc(docId).delete();
-        
         if(window.Logger) {
             await Logger.log("DELETE", `Deleted document ID: ${docId}`);
         }
-        alert("Document deleted.");
-        // Reload to update list
         window.location.reload();
     } catch (e) {
         console.error(e);

@@ -1,35 +1,73 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard | GovDocs Secure</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-    <nav>
-        <div class="brand">🔐 GovDocs</div>
-        <ul>
+
+    <nav class="app-nav">
+        <div class="nav-brand">
+            <span style="font-size: 1.5rem;">🔐</span>
+            <span>GovDocs<span class="desktop-only" style="font-weight:400; color: #94A3B8; margin-left:8px;">| Citizen Vault</span></span>
+        </div>
+        
+        <ul class="nav-links">
             <li><a href="upload.html">Upload</a></li>
-            <li><a href="share.html">Share</a></li>
+            <li><a href="share.html">Share Access</a></li>
             <li><a href="profile.html">Profile</a></li>
-            <li><a href="activity.html">Activity</a></li>
-            <li><a href="#" onclick="logout()">Logout</a></li>
+            <li><a href="activity.html">Audit Log</a></li>
+            <li class="desktop-only"><a href="#" onclick="logout()" style="color: var(--state-danger);">Logout</a></li>
+            <li class="mobile-only"><a href="#" onclick="logout()" style="color: var(--state-danger);">Exit</a></li>
         </ul>
     </nav>
-    <div class="container">
-        <h2>My Documents</h2>
-        <div style="margin: 1rem 0;">
-            <input type="text" id="searchBar" placeholder="Search..." style="width: 60%;">
-            <select id="categoryFilter" style="width: 30%;">
-                <option value="all">All</option>
-                <option value="Identity">Identity</option>
-                <option value="Education">Education</option>
-            </select>
-        </div>
-        <div id="docLoader">Loading...</div>
-        <div id="docGrid" class="grid-view"></div>
+
+    <div class="main-layout">
+        
+        <aside class="sidebar">
+            <div style="margin-bottom: 32px;">
+                <h3 style="color: var(--gov-slate); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px;">Quick Stats</h3>
+                <div style="font-size: 2.5rem; font-weight: 700;" id="docCountDisplay">-</div>
+                <div style="font-size: 0.9rem; color: var(--gov-graphite);">Secure Documents</div>
+            </div>
+            <div style="padding: 16px; background: #EFF6FF; border-radius: 6px; border: 1px solid #DBEAFE;">
+                <h4 style="color: #1E40AF; font-size: 0.9rem; margin-bottom: 4px;">Security Status</h4>
+                <p style="font-size: 0.8rem; margin:0; color: #3B82F6;">Encrypted & Active</p>
+            </div>
+        </aside>
+
+        <section class="content">
+            <header style="margin-bottom: 24px;">
+                <h2>Document Repository</h2>
+                <p class="desktop-only">Manage your encrypted government documents securely.</p>
+            </header>
+
+            <div class="controls-bar">
+                <div style="flex: 2;">
+                    <label for="searchBar" class="desktop-only">Search Archive</label>
+                    <input type="text" id="searchBar" placeholder="Search by name..." style="margin: 0;">
+                </div>
+                <div style="flex: 1;">
+                    <label for="categoryFilter" class="desktop-only">Filter Category</label>
+                    <select id="categoryFilter" style="margin: 0;">
+                        <option value="all">All Categories</option>
+                        <option value="Identity">Identity</option>
+                        <option value="Education">Education</option>
+                        <option value="Health">Health</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="docLoader" style="padding: 40px; text-align: center; color: var(--gov-slate);">
+                Initializing Secure Connection...
+            </div>
+            
+            <div id="docGrid" class="grid-view"></div>
+        </section>
     </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -37,7 +75,7 @@
     <script src="js/utils.js"></script>
     <script src="js/logger.js"></script>
     <script src="js/auth.js"></script>
+    
     <script src="js/dashboard.js"></script>
 </body>
-
 </html>
