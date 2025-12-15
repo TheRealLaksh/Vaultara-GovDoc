@@ -27,12 +27,17 @@
                 <form id="profileForm">
                     <div class="form-group">
                         <label>Full Legal Name</label>
-                        <input type="text" id="fullName" placeholder="Name">
+                        <input type="text" id="fullName" placeholder="Enter your name" required>
                     </div>
 
                     <div class="form-group">
-                        <label>Family ID</label>
-                        <input type="text" value="FAMILY-7382" disabled style="background: var(--gov-silver); cursor: not-allowed;">
+                        <label>Family ID (Share this code to link family)</label>
+                        <input type="text" id="familyId" placeholder="Loading ID..." 
+                               style="font-family: monospace; letter-spacing: 0.1em; font-weight: 700; color: var(--gov-navy); background: #f8fafc;" 
+                               maxlength="10">
+                        <p style="font-size: 0.75rem; color: var(--gov-slate); margin-top: 6px;">
+                            This code identifies your family vault. Share it securely.
+                        </p>
                     </div>
 
                     <button type="submit" class="btn-primary-reveal">
@@ -57,6 +62,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/logger.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/profile.js"></script>
 </body>
