@@ -45,6 +45,21 @@
         </aside>
 
         <main class="main-content">
+            <div id="verifyBanner" class="hidden" style="background: #fffbeb; border: 1px solid #fcd34d; padding: 16px; border-radius: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <div style="background:#f59e0b; color:white; padding:8px; border-radius:50%;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 0.95rem; margin:0; color: #92400e;">Action Required: Verify Email</h4>
+                        <p style="font-size: 0.85rem; margin:0; color: #b45309;">Verify your email to enable full sharing features.</p>
+                    </div>
+                </div>
+                <button onclick="sendVerification()" class="btn-tab" style="background: white; border: 1px solid #fcd34d; color: #d97706;">
+                    Send Link
+                </button>
+            </div>
+
             <header style="margin-bottom: 32px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <h1 style="font-size: 1.75rem; font-weight: 700;">My Vault</h1>
@@ -87,5 +102,6 @@
     <script src="js/logger.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/otp.js"></script> 
 </body>
 </html>

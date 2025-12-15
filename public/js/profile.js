@@ -1,11 +1,11 @@
 checkAuth();
 
 const profilePhone = document.getElementById('profilePhone');
+const verifyBadge = document.getElementById('verifyBadge');
 const nameInput = document.getElementById('fullName');
 const familyIdInput = document.getElementById('familyId');
 const profileForm = document.getElementById('profileForm');
 
-// Make this available to the HTML button
 window.generateRandomId = () => {
     const randomCode = 'FAM-' + Math.floor(1000 + Math.random() * 9000);
     if(familyIdInput) familyIdInput.value = randomCode;
@@ -13,10 +13,31 @@ window.generateRandomId = () => {
 
 auth.onAuthStateChanged(async (user) => {
     if (user) {
-        // 1. Display Email (Real Identity)
+        // 1. Display Email
         if(profilePhone) profilePhone.innerText = user.email;
 
-        // 2. Fetch existing profile data
+        // 2. Update Verification Badge
+        if(verifyBadge) {
+            if(user.emailVerified) {
+                verifyBadge.innerText = "Verified Citizen";
+                verifyBadge.style.backgroundColor = "#dcfce7";
+                verifyBadge.style.color = "#166534";
+            } else {
+                verifyBadge.innerText = "Unverified";
+                verifyBadge.style.backgroundColor = "#fef3c7";
+                verifyBadge.style.color = "#b45309";
+                
+                // Make it clickable to resend
+                verifyBadge.style.cursor = "pointer";
+                verifyBadge.title = "Click to send verification email";
+                verifyBadge.onclick = async () => {
+                    await user.sendEmailVerification();
+                    alert("Verification link sent!");
+                };
+            }
+        }
+
+        // 3. Fetch existing profile data
         try {
             const doc = await db.collection('users').doc(user.uid).get();
             
@@ -24,7 +45,6 @@ auth.onAuthStateChanged(async (user) => {
                 const data = doc.data();
                 if(data.name && nameInput) nameInput.value = data.name;
                 
-                // If Family ID exists, show it.
                 if(data.familyId && familyIdInput) {
                     familyIdInput.value = data.familyId;
                 }
@@ -35,13 +55,12 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-// 3. Save Profile Logic
 if(profileForm) {
     profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const user = auth.currentUser;
         const name = nameInput.value;
-        const familyId = familyIdInput.value.toUpperCase().trim(); // Clean the ID
+        const familyId = familyIdInput.value.toUpperCase().trim();
 
         if (!user) return;
 
@@ -51,19 +70,17 @@ if(profileForm) {
         btn.disabled = true;
 
         try {
-            // Save Profile
             await db.collection('users').doc(user.uid).set({
                 name: name,
                 familyId: familyId,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                aadhaarLinked: true 
             }, { merge: true });
 
             if(window.Logger) {
                 await Logger.log("PROFILE_UPDATE", `Updated profile. Family ID: ${familyId || 'None'}`);
             }
 
-            alert("Profile Updated! You are now linked to Family ID: " + (familyId || "None"));
+            alert("Profile Updated!");
         } catch (error) {
             console.error(error);
             alert("Error: " + error.message);

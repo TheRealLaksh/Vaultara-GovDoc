@@ -5,27 +5,49 @@ const loader = document.getElementById('docLoader');
 const searchBar = document.getElementById('searchBar');
 const categoryFilter = document.getElementById('categoryFilter');
 const docCountDisplay = document.getElementById('docCountDisplay');
+const verifyBanner = document.getElementById('verifyBanner');
 
 let allDocs = [];
 
+// Verification Logic
+window.sendVerification = async () => {
+    const user = auth.currentUser;
+    if(user) {
+        try {
+            await user.sendEmailVerification();
+            alert(`Verification link sent to ${user.email}. Please check your inbox (and spam).`);
+        } catch (error) {
+            console.error(error);
+            alert("Error sending link: " + error.message);
+        }
+    }
+};
+
 auth.onAuthStateChanged(async user => {
     if (user) {
-        // CHANGED: Use real email for sharing logic
         const myEmail = user.email; 
         
+        // CHECK VERIFICATION STATUS
+        if (!user.emailVerified && verifyBanner) {
+            verifyBanner.classList.remove('hidden');
+            verifyBanner.style.display = 'flex'; // Enforce flex
+        } else if (verifyBanner) {
+            verifyBanner.classList.add('hidden');
+        }
+
         try {
             // 1. Get User Profile for Family ID
             let myFamilyId = null;
             const userDoc = await db.collection('users').doc(user.uid).get();
             if(userDoc.exists) myFamilyId = userDoc.data().familyId;
 
-            // 2. Prepare Queries (Using Email for sharedWith)
+            // 2. Prepare Queries
             const queries = [
                 db.collection('documents').where('ownerId', '==', user.uid).get(),
                 db.collection('documents').where('sharedWith', 'array-contains', myEmail).get()
             ];
 
-            // 3. Add Family Query if ID exists
+            // 3. Add Family Query
             if(myFamilyId) {
                 queries.push(db.collection('documents').where('familyId', '==', myFamilyId).get());
             }
