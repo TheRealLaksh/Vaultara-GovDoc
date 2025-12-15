@@ -6,34 +6,50 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <nav class="app-nav">
-        <div class="nav-brand">🔐 Vaultara</div>
-        <ul class="nav-links">
-            <li><a href="dashboard.html" class="btn-tab">Back</a></li>
-        </ul>
-    </nav>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div><div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 40px;">🔐 Vaultara</div>
+            <a href="dashboard.html" class="btn-tab">Back to Dashboard</a></div>
+        </aside>
 
-    <div class="container">
-        <h2>My Profile</h2>
-        <div class="card">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h3 id="profilePhone">...</h3>
-                <span class="status-badge" style="background:#DCFCE7; color:#166534;">Aadhaar Linked</span>
-            </div>
+        <main class="main-content">
+            <h1 style="margin-bottom: 24px;">Citizen Profile</h1>
             
-            <form id="profileForm">
-                <label>Full Name</label>
-                <input type="text" id="fullName" placeholder="Name">
-
-                <label>Family ID</label>
-                <div style="display: flex; gap: 10px; margin-bottom: 24px;">
-                    <input type="text" value="FAMILY-7382" disabled style="margin:0;">
-                    <button type="button" class="btn-tab" style="border:1px solid var(--gov-silver);" onclick="alert('Feature coming soon')">Manage</button>
+            <div class="ui-card anim-stagger-1" style="max-width: 600px;">
+                <div style="display:flex; align-items:center; gap: 16px; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--gov-silver);">
+                    <div style="background: var(--gov-navy); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👤</div>
+                    <div>
+                        <h3 id="profilePhone" style="font-size: 1.25rem;">Loading...</h3>
+                        <span class="status-badge" style="background: #f0fdf4; color: #15803d; margin-top: 4px;">Aadhaar Linked</span>
+                    </div>
                 </div>
+                
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label>Full Legal Name</label>
+                        <input type="text" id="fullName" placeholder="Name">
+                    </div>
 
-                <button type="submit" class="btn-pill">Save Changes</button>
-            </form>
-        </div>
+                    <div class="form-group">
+                        <label>Family ID</label>
+                        <input type="text" value="FAMILY-7382" disabled style="background: var(--gov-silver); cursor: not-allowed;">
+                    </div>
+
+                    <button type="submit" class="btn-primary-reveal">
+                        <span class="btn-text-initial">Update Profile</span>
+                        <div class="btn-bg-reveal"></div>
+                        <div class="btn-text-reveal">
+                            <span>Save Changes</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        </div>
+                    </button>
+                </form>
+            </div>
+        </main>
+        
+        <nav class="mobile-nav">
+             <a href="dashboard.html" class="btn-tab">Back</a>
+        </nav>
     </div>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>

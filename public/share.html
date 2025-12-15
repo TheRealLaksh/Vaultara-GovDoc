@@ -2,37 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Share Access | Vaultara</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share | Vaultara</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <nav class="app-nav">
-        <div class="nav-brand">🔐 Vaultara</div>
-        <ul class="nav-links">
-            <li><a href="dashboard.html" class="btn-tab">Back</a></li>
-        </ul>
-    </nav>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div><div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 40px;">🔐 Vaultara</div>
+            <a href="dashboard.html" class="btn-tab">Back to Dashboard</a></div>
+        </aside>
 
-    <div class="auth-container">
-        <h2>Family Sharing</h2>
-        <form id="shareForm">
-            <label>Select Document</label>
-            <select id="docSelect" required><option>Loading...</option></select>
+        <main class="main-content">
+            <h1 style="margin-bottom: 24px;">Family Sharing</h1>
             
-            <label>Receiver Mobile</label>
-            <input type="tel" id="receiverPhone" placeholder="10-digit number" required>
-            <p style="font-size: 0.8rem; color: var(--gov-slate); margin-bottom: 16px;">
-                * Receiver must have a Vaultara account.
-            </p>
-            
-            <div id="shareStatus" style="margin-bottom: 16px; font-weight: 600;"></div>
-            
-            <button type="submit" class="btn-pill">
-                Grant Access
-            </button>
-        </form>
+            <div class="ui-card anim-stagger-1" style="max-width: 600px;">
+                <p style="color: var(--gov-slate); margin-bottom: 24px;">
+                    Grant access to family members. They must have a Vaultara account.
+                </p>
+
+                <form id="shareForm">
+                    <div class="form-group">
+                        <label>Select Document</label>
+                        <select id="docSelect" required><option>Loading Vault...</option></select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Receiver Mobile Number</label>
+                        <input type="tel" id="receiverPhone" placeholder="10-digit number" required>
+                    </div>
+                    
+                    <div id="shareStatus" style="margin-bottom: 24px; font-weight: 600;"></div>
+                    
+                    <button type="submit" class="btn-primary-reveal">
+                        <span class="btn-text-initial">Grant Access</span>
+                        <div class="btn-bg-reveal"></div>
+                        <div class="btn-text-reveal">
+                            <span>Confirm Share</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        </div>
+                    </button>
+                </form>
+            </div>
+        </main>
+        
+        <nav class="mobile-nav">
+             <a href="dashboard.html" class="btn-tab">Back</a>
+        </nav>
     </div>
-    
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>

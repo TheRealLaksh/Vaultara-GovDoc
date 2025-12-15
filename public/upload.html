@@ -1,38 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload | Vaultara</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <nav class="app-nav">
-        <div class="nav-brand">🔐 Vaultara</div>
-        <ul class="nav-links">
-            <li><a href="dashboard.html" class="btn-tab">Back</a></li>
-        </ul>
-    </nav>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div><div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 40px;">🔐 Vaultara</div>
+            <a href="dashboard.html" class="btn-tab">Back to Dashboard</a></div>
+        </aside>
 
-    <div class="auth-container">
-        <h2>Upload Document</h2>
-        <form id="uploadForm">
-            <label>Title</label>
-            <input type="text" id="docTitle" required>
-            <label>Category</label>
-            <select id="docCategory">
-                <option value="Identity">Identity</option>
-                <option value="Education">Education</option>
-                <option value="Health">Health</option>
-            </select>
-            <label>File (Max 500KB)</label>
-            <input type="file" id="fileInput" required accept="image/*,application/pdf">
+        <main class="main-content">
+            <h1 style="margin-bottom: 24px;">Upload Document</h1>
             
-            <div id="uploadStatus" style="margin-bottom: 16px;"></div>
-            
-            <button type="submit" class="btn-pill">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Upload Securely
-            </button>
-        </form>
+            <div class="ui-card anim-stagger-1" style="max-width: 600px;">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label>Document Title</label>
+                        <input type="text" id="docTitle" placeholder="e.g. Aadhaar Card" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="docCategory">
+                            <option value="Identity">Identity Document</option>
+                            <option value="Education">Education Certificate</option>
+                            <option value="Health">Health Record</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="border: 2px dashed var(--gov-silver); padding: 20px; border-radius: 12px; text-align: center;">
+                        <label style="margin-bottom: 12px;">Select File (Max 500KB)</label>
+                        <input type="file" id="fileInput" required accept="image/*,application/pdf" style="border:none; padding:0;">
+                    </div>
+                    
+                    <div id="uploadStatus" style="margin-bottom: 24px; font-weight: 600; font-size: 0.9rem;"></div>
+                    
+                    <button type="submit" class="btn-primary-reveal">
+                        <span class="btn-text-initial">Start Encryption</span>
+                        <div class="btn-bg-reveal"></div>
+                        <div class="btn-text-reveal">
+                            <span>Upload Securely</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        </div>
+                    </button>
+                </form>
+            </div>
+        </main>
+        
+        <nav class="mobile-nav">
+             <a href="dashboard.html" class="btn-tab">Back</a>
+        </nav>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>

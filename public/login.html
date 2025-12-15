@@ -6,35 +6,55 @@
     <title>Login | Vaultara</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body style="display:flex; flex-direction:column; min-height:100vh;">
-    
-    <nav class="app-nav" style="justify-content:center;">
-        <div class="nav-brand">🔐 Vaultara Login</div>
-    </nav>
+<body>
 
-    <div class="auth-container" style="max-width: 400px; margin: 4rem auto;">
-        <div style="text-align:center; margin-bottom: 24px;">
-            <h2>Citizen Access</h2>
-            <p>Secure Government Vault</p>
-        </div>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div style="text-align:center; margin-bottom: 32px;">
+                <div style="font-size: 2rem; margin-bottom: 8px;">🔐</div>
+                <h2 style="font-weight: 700;">Citizen Access</h2>
+                <p style="color: var(--gov-slate);">Verify identity to proceed</p>
+            </div>
 
-        <div id="step1">
-            <label>Mobile Number</label>
-            <input type="tel" id="phoneNumber" placeholder="99999 99999">
-            <button class="btn-pill" onclick="sendOTP()">
-                Get OTP Code &rarr;
-            </button>
-        </div>
+            <div id="step1">
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="phoneNumber" placeholder="99999 99999" autofocus>
+                </div>
+                
+                <button class="btn-primary-reveal" onclick="sendOTP()" style="width: 100%; max-width: 100%;">
+                    <span class="btn-text-initial">Get OTP Code</span>
+                    <div class="btn-bg-reveal"></div>
+                    <div class="btn-text-reveal">
+                        <span>Send Code</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </div>
+                </button>
+                
+                <div style="text-align:center; margin-top:20px;">
+                    <a href="index.html" class="btn-tab" style="display:inline-flex;">Back to Home</a>
+                </div>
+            </div>
 
-        <div id="step2" class="hidden">
-            <label>Enter 6-Digit OTP</label>
-            <input type="text" id="otpCode" style="text-align:center; letter-spacing:4px; font-weight:bold;">
-            <button class="btn-pill" onclick="verifyOTP()">
-                Verify Identity
-            </button>
-            <button class="btn-tab" style="width:100%; justify-content:center; margin-top:12px;" onclick="window.location.reload()">
-                Cancel
-            </button>
+            <div id="step2" class="hidden">
+                <div class="form-group">
+                    <label>Enter 6-Digit Code</label>
+                    <input type="text" id="otpCode" style="text-align:center; letter-spacing: 0.5em; font-weight: 700; font-size: 1.2rem;">
+                </div>
+
+                <button class="btn-primary-reveal" onclick="verifyOTP()" style="width: 100%; max-width: 100%;">
+                    <span class="btn-text-initial">Verify & Login</span>
+                    <div class="btn-bg-reveal"></div>
+                    <div class="btn-text-reveal">
+                        <span>Unlock Vault</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                </button>
+                
+                <button class="btn-tab btn-tab-danger" onclick="window.location.reload()" style="width:100%; justify-content:center; margin-top:16px;">
+                    Cancel Verification
+                </button>
+            </div>
         </div>
     </div>
 

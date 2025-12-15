@@ -1,31 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Activity | Vaultara</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <nav class="app-nav">
-        <div class="nav-brand">🔐 Vaultara</div>
-        <ul class="nav-links">
-            <li><a href="dashboard.html" class="btn-tab">Back</a></li>
-        </ul>
-    </nav>
-    <div class="container">
-        <h2>Activity Logs</h2>
-        <div class="card">
-            <table style="width:100%; text-align:left; border-collapse: collapse;">
-                <thead>
-                    <tr style="border-bottom: 2px solid var(--gov-silver);">
-                        <th style="padding:12px;">Time</th>
-                        <th style="padding:12px;">Action</th>
-                        <th style="padding:12px;">Details</th>
-                    </tr>
-                </thead>
-                <tbody id="logTableBody"></tbody>
-            </table>
-        </div>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div><div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 40px;">🔐 Vaultara</div>
+            <a href="dashboard.html" class="btn-tab">Back to Dashboard</a></div>
+        </aside>
+
+        <main class="main-content">
+            <h1 style="margin-bottom: 24px;">Audit Logs</h1>
+            
+            <div class="ui-card anim-stagger-1" style="overflow-x: auto;">
+                <table style="width:100%; text-align:left; border-collapse: collapse; min-width: 600px;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--gov-silver);">
+                            <th style="padding:16px; color: var(--gov-graphite); font-size: 0.8rem; text-transform: uppercase;">Time</th>
+                            <th style="padding:16px; color: var(--gov-graphite); font-size: 0.8rem; text-transform: uppercase;">Action</th>
+                            <th style="padding:16px; color: var(--gov-graphite); font-size: 0.8rem; text-transform: uppercase;">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody"></tbody>
+                </table>
+            </div>
+        </main>
+        
+        <nav class="mobile-nav">
+             <a href="dashboard.html" class="btn-tab">Back</a>
+        </nav>
     </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>

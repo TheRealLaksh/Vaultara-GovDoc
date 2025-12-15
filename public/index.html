@@ -1,20 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Vaultara Secure</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaultara | Citizen Document Secure</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body style="display:flex; flex-direction:column; height:100vh; justify-content:center; align-items:center; text-align:center;">
-    
-    <div class="container" style="margin:0;">
-        <h1 style="margin-bottom: 16px;">Vaultara</h1>
-        <p style="margin-bottom: 32px; font-size: 1.2rem; color: var(--gov-graphite);">
-            Secure & Share Government Documents with Family.
-        </p>
+<body style="display:flex; align-items:center; justify-content:center; text-align:center;">
+
+    <div class="main-content" style="max-width: 600px;">
+        <div class="anim-stagger-1" style="font-size: 4rem; margin-bottom: 20px;">🔐</div>
         
-        <a href="login.html" class="btn-pill" style="width: auto; padding-left: 40px; padding-right: 40px;">
-            Login / Register
-        </a>
+        <h1 class="anim-stagger-2" style="font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.05em;">
+            Vaultara
+        </h1>
+        
+        <p class="anim-stagger-3" style="color: var(--gov-graphite); font-size: 1.1rem; line-height: 1.6; margin-bottom: 40px;">
+            The official secure repository for citizen document management and family sharing. 
+            Encrypted, auditable, and accessible.
+        </p>
+
+        <div class="anim-stagger-3" style="display:flex; justify-content:center;">
+            <a href="login.html" class="btn-primary-reveal">
+                <span class="btn-text-initial">Access Vault</span>
+                <div class="btn-bg-reveal"></div>
+                <div class="btn-text-reveal">
+                    <span>Login / Register</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                </div>
+            </a>
+        </div>
     </div>
 
     <script src="js/firebase-config.js"></script>
