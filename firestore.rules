@@ -1,19 +1,89 @@
 rules_version = '2';
+
+// Vaultara Firestore rules.
+// Default deny. Clients can read what they are entitled to see. Every
+// privileged write (documents, shares, families, audit logs) is made by Cloud
+// Functions with the Admin SDK, which bypasses these rules.
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Existing Rules
-    match /documents/{docId} {
-      allow read, write: if request.auth != null;
-    }
-    match /logs/{logId} {
-      allow read, write: if request.auth != null;
+
+    function signedIn() {
+      return request.auth != null;
     }
 
-    // NEW RULE: User Profiles
-    match /users/{userId} {
-      // Users can only read/write their OWN profile (userId matches auth.uid)
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // Reads of vault data require a verified email address.
+    function verified() {
+      return signedIn() && request.auth.token.email_verified == true;
+    }
+
+    function me() {
+      return request.auth.uid;
+    }
+
+    // Family membership is carried as a custom claim set by the server, so a
+    // query constrained to the same familyId can be proven safe by Firestore.
+    function myFamily() {
+      return request.auth.token.get('familyId', null);
+    }
+
+    // Profile: the owner may read it and change only a few harmless fields.
+    match /users/{uid} {
+      allow read: if signedIn() && me() == uid;
+      allow create: if false;
+      allow update: if signedIn() && me() == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'theme', 'updatedAt'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 80
+        && request.resource.data.theme in ['system', 'light', 'dark'];
+      allow delete: if false;
+    }
+
+    // Document metadata. File contents never live in Firestore.
+    match /documents/{docId} {
+      allow read: if verified() && (
+        resource.data.ownerId == me()
+        || me() in resource.data.sharedWithUids
+        || (resource.data.familyShared == true
+            && resource.data.familyId != null
+            && resource.data.familyId == myFamily())
+      );
+      allow write: if false;
+    }
+
+    // Wrapped data keys are server only.
+    match /docKeys/{docId} {
+      allow read, write: if false;
+    }
+
+    match /shares/{shareId} {
+      allow read: if verified() && (resource.data.ownerId == me() || resource.data.recipientUid == me());
+      allow write: if false;
+    }
+
+    match /families/{familyId} {
+      allow read: if verified() && me() in resource.data.memberUids;
+      allow write: if false;
+    }
+
+    // Only the person who created an invite can list it.
+    match /familyInvites/{code} {
+      allow read: if verified() && resource.data.createdBy == me();
+      allow write: if false;
+    }
+
+    // Immutable trail. Readable by the person who acted and by the owner of
+    // the document that was touched. Nobody can write from a client.
+    match /auditLogs/{logId} {
+      allow read: if verified() && me() in resource.data.subjects;
+      allow write: if false;
+    }
+
+    match /rateLimits/{key} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

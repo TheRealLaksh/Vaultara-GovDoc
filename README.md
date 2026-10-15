@@ -1,165 +1,97 @@
-# 🔐 Vaultara (GovDoc)
+# Vaultara
 
-> **Secure Citizen Document Vault & Family Sharing System**
+A private, encrypted vault for the papers that matter: identity cards, certificates, health records. Share them with a person for a limited time, open them to your household, and see a record of everyone who opened them.
 
-<div align="center">
+Vaultara is an independent project. It is not affiliated with any government body.
 
-![Status](https://img.shields.io/badge/STATUS-BETA-orange?style=for-the-badge)
-![Security](https://img.shields.io/badge/SECURITY-ENCRYPTED-green?style=for-the-badge)
-![Tech](https://img.shields.io/badge/STACK-FIREBASE_JS-blue?style=for-the-badge)
+## What it does
 
-</div>
+- **Encrypted storage.** Every file is checked by its first bytes, sealed with AES-256-GCM under its own key, and stored in a bucket no browser can read. The key is wrapped by a master key held in Google Secret Manager.
+- **Sharing with an end date.** Share by email as view only or view and download, for 1 to 365 days or until you stop. Revoke at any time.
+- **Family.** Start a family, invite people with one-time codes, and choose which documents the household can see.
+- **Activity trail.** Every sign in, view, download, share and removal is written by server code, so the browser cannot forge or delete entries. Owners see what others did to their documents.
+- **Renewal reminders.** Give a document an expiry date and the vault flags it as it approaches.
+- **Strong sign in.** Email and password with enforced verification, passwordless email links, and authenticator app (TOTP) two-step sign in.
+- **Your data is yours.** Export your records and delete your account, which removes your files, keys and shares.
 
-## 📖 Introduction
-**Vaultara** is a secure, cloud-based repository designed for citizens to store, manage, and share essential government documents (Identity, Health, Education). Built with a "Privacy-First" approach, it features robust audit logging, family account linking, and a responsive "Gov-Tech" UI design system.
+It is not end-to-end encrypted. The server holds the keys so that sharing and family access work. See [SECURITY.md](SECURITY.md).
 
-Unlike traditional storage, Vaultara emphasizes **traceability**—every action (view, share, delete) is immutably logged for user security.
+## Stack
 
----
+| Layer | Choice |
+|---|---|
+| Front end | Vite, vanilla ES modules, a small router and an escaping `html` template helper. No framework. |
+| Auth | Firebase Authentication (password, email link, TOTP) |
+| Data | Cloud Firestore with default-deny rules |
+| Files | Cloud Storage (`inbox/` write-only, `vault/` server-only) |
+| Server | Cloud Functions v2 (Node 22), region `asia-south1` |
+| Secrets | Secret Manager (`VAULT_MASTER_KEY`) |
+| Hosting | Firebase Hosting with a strict Content-Security-Policy |
 
-## 🚀 Key Features
+```
+src/            front end (views, services, components, styles)
+functions/      Cloud Functions (encryption, access control, audit)
+tests/          unit tests, security rules tests, end-to-end test
+docs/           audit of the legacy code and the rebuild plan
+```
 
-### 🛡️ Secure Document Management
-* **Client-Side Processing:** Files are converted to Base64 strings before upload, ensuring no raw files sit in traditional storage buckets.
-* **Size Enforcement:** Strict 500KB limit enforced on the client side to maintain database performance.
-* **Categorization:** Tag documents as *Identity*, *Education*, or *Health* with dedicated visual icons.
+## Run it locally
 
-### 👨‍👩‍👧‍👦 Family Linking & Sharing
-* **Family ID System:** Users can generate or join a "Family ID" (e.g., `FAM-1234`) to automatically view documents shared across the entire household.
-* **Direct Sharing:** Granular sharing permissions allowing users to grant access to specific individuals via email.
-* **Smart Dashboard:** Unified view aggregating **Owned**, **Shared**, and **Family** documents into a single secure grid.
-
-### 🔍 Smart Search & Organization
-* **Instant Filtering:** Real-time client-side search allows users to find documents by name instantly without page reloads.
-* **Category Filters:** Dedicated one-click filters for *Identity*, *Education*, and *Health* documents to de-clutter the vault.
-* **Visual Indicators:** Unique SVG icons and color-coded badges (e.g., "SECURE", "SHARED IN", "FAMILY") for quick document recognition.
-
-### ✨ Interactive "Gov-Tech" UX
-* **Cinematic Motion:** The custom CSS engine powers 30+ micro-interactions, including `slide-up-content`, `pulse`, and `reveal` animations for button clicks and page loads.
-* **Feedback Loops:** Instant visual feedback (spinners, success toasts) for all async actions like Uploading and Sharing.
-
-### ✅ Identity Verification
-* **Trust Badges:** Visual "Verified Citizen" badges appear on profiles once email verification is complete.
-* **Action Banners:** Conditional alerts prompt unverified users to secure their account via email links.
-
----
-
-## 🛡️ Security Architecture
-
-### 📝 Granular Audit Logging
-* **Event Tracking:** Automatically records high-value actions (`LOGIN`, `UPLOAD`, `SHARE`, `DELETE`) with server-side timestamps for immutable proof of activity.
-* **Waterfall Visualization:** The Activity Log uses staggered animations to present history in a clear, time-ordered waterfall list.
-* **Context Aware:** Logs specifically capture metadata like "Family ID" updates or specific document names for detailed traceability.
-
-### 🔐 Multi-Tier Access Control
-* **Owner Sovereignty:** Only the original uploader (`ownerId`) retains "Delete" privileges, ensuring shared users cannot destroy data.
-* **Family Inheritance:** Documents tagged with a `familyId` are automatically propagated to all linked accounts without manual sharing.
-* **Self-Share Prevention:** Logic guards explicitly block users from sharing documents with their own email to prevent database redundancy.
-
----
-
-## 🎨 Design System & Backend Logic
-
-### 🎨 "Gov-Tech" Aesthetics
-* **Cinematic Micro-Interactions:** "Reveal" buttons expand a colored circle and swap text (e.g., "Upload" → "Upload Securely") on hover.
-* **Adaptive Navigation:** The interface automatically shifts from a desktop **Sidebar** to a mobile **Bottom Bar** based on viewport width.
-* **Staggered Loading:** Dashboard items and table rows enter the viewport with calculated delays (`anim-stagger-1`, `anim-stagger-2`) for a polished feel.
-
-### 💾 Smart Data Aggregation
-* **Unified Querying:** The dashboard executes three parallel queries (Owned, Shared, Family), merges the results, and deduplicates entries client-side for a seamless view.
-* **Identity Management:** Built-in generator creates human-readable 4-digit codes (`FAM-XXXX`) for easy family onboarding.
-
----
-
-## 🛠️ Tech Stack
-
-| Component | Technology | Description |
-| :--- | :--- | :--- |
-| **Frontend** | Vanilla JS (ES6+) | Lightweight, no-framework approach for maximum speed. |
-| **Styling** | CSS3 Variables | Custom "Gov-Tech" design system (`--gov-navy`, `--gov-slate`). |
-| **Backend** | Firebase (BaaS) | Serverless architecture. |
-| **Database** | Cloud Firestore | NoSQL document storage for metadata and Base64 file content. |
-| **Auth** | Firebase Auth | Secure email/password handling. |
-| **Hosting** | Firebase Hosting | Fast, secure static content delivery. |
-
----
-
-## 📂 Project Structure
+You need Node 22 and Java 21 or later (for the Firestore emulator).
 
 ```bash
-Vaultara-GovDoc/
-├── firestore.rules          # Database security rules
-├── test-cases.md            # System test scenarios
-├── public/                  # Static assets & frontend code
-│   ├── index.html           # Landing page
-│   ├── dashboard.html       # Main application view
-│   ├── css/
-│   │   └── style.css        # Core design system & animations
-│   └── js/
-│       ├── auth.js          # Session management
-│       ├── dashboard.js     # Document fetching & rendering
-│       ├── upload.js        # File processing & encryption
-│       ├── logger.js        # Audit logging utility
-│       └── utils.js         # Shared helper functions
-└── firebase.json            # Firebase configuration
-## 💻 Technical Highlights
+npm install
+npm --prefix functions install
 
-### ⚡ Performance Architecture
-* **Zero-Bundle Frontend:** Built entirely with **Vanilla JavaScript (ES6+)**, eliminating the need for heavy bundlers like Webpack or huge `node_modules` folders.
-* **Optimized Assets:** No external CSS frameworks (Tailwind/Bootstrap) used; the design system is hand-coded using native CSS Variables for maximum performance.
+# 1. a throwaway secret for local encryption
+node -e "console.log('VAULT_MASTER_KEY='+require('crypto').randomBytes(32).toString('base64'))" > functions/.secret.local
 
-### 🧪 Robust Testing
-* **Security Validation:** Includes test cases for SQL/NoSQL injection prevention and input sanitization.
-* **Logic Guards:** Client-side validation prevents critical errors, such as uploading oversized files (>500KB).
+# 2. point the app at the emulators
+printf 'VITE_FIREBASE_PROJECT_ID=demo-vaultara\nVITE_USE_EMULATORS=true\n' > .env.local
 
----
+# 3. run everything (two terminals)
+npx firebase emulators:start --only auth,firestore,functions,storage --project demo-vaultara
+npm run dev
+```
 
-## ⚡ Getting Started
+Open http://localhost:5173. Emulated email links are printed in the emulator terminal.
 
-### Prerequisites
-* Node.js & npm installed
-* Firebase CLI installed (`npm install -g firebase-tools`)
+## Tests
 
-### Installation
+```bash
+npm test                 # front end unit tests
+npm run test:functions   # encryption, validation, access logic
+npm run test:rules       # Firestore security rules on the emulator
+node tests/e2e/smoke.mjs # full browser run against the emulators (needs Chromium)
+npm run check            # style rules: no dash characters, no inline styles or handlers
+```
 
-1. **Clone the Repository**
+The end-to-end test registers users, uploads and previews a document, verifies the stored bytes are ciphertext, checks that markup in a title cannot run, shares with another account (view only, then revoked), joins a family, and signs out.
+
+## Deploy
+
+1. Upgrade the Firebase project to the Blaze plan (Storage and Functions need it).
+2. In the console, enable Email/Password and Email link sign in, and enable TOTP multi-factor (Identity Platform).
+3. Set the master key. Generate 32 random bytes, base64 encoded, and keep a backup somewhere safe. Losing it makes every stored file unreadable.
    ```bash
-   git clone [https://github.com/yourusername/vaultara-govdoc.git](https://github.com/yourusername/vaultara-govdoc.git)
-   cd vaultara-govdoc
+   firebase functions:secrets:set VAULT_MASTER_KEY
+   ```
+4. Copy `.env.example` to `.env.local` (or set the variables in CI) with your web app config.
+5. Deploy.
+   ```bash
+   npm run deploy
+   ```
 
-   ## 🔥 Initialize Firebase
+Notes:
 
-```bash
-firebase login
-firebase init
-# Select: Firestore, Hosting
-# Use existing project: gov-docs-b2a1f
-```
+- The Storage bucket and Functions region default to Mumbai (`asia-south1`). Change `REGION` in `functions/src/runtime.js`, `region` in `firebase.json` and `VITE_FUNCTIONS_REGION` together.
+- Set an App Check provider and enable enforcement if you expect abuse. The functions already rate limit every sensitive action per user.
+- Storage rules cannot be exercised by the local emulator in every environment. Test `storage.rules` once in a staging project.
 
----
+## Legacy
 
-## ▶️ Run Locally
+The original 2025 build (vanilla pages on the compat SDK, files stored as Base64 in Firestore, rules that let any signed-in user read everything) is described in [docs/AUDIT.md](docs/AUDIT.md). The rebuild plan is in [docs/PLAN.md](docs/PLAN.md).
 
-```bash
-firebase serve
-```
+## Licence
 
-Access the app at:  
-`http://localhost:5000`
-
----
-
-## ⚠️ Security Note (Beta)
-
-**Current Storage:**  
-Documents are stored directly in **Firestore as Base64 strings**.
-
-**Vulnerability Notice:**  
-Before deploying to production, ensure `firestore.rules` strictly validate  
-`request.auth.uid` against the resource owner to prevent unauthorized access.
-
----
-
-<div align="center">
-  <sub>Built with 🔐 by the Vaultara Team</sub>
-</div>
+See [LICENSE](LICENSE).

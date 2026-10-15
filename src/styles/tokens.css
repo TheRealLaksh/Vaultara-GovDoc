@@ -1,0 +1,104 @@
+/* Vaultara design tokens. Editorial and warm: paper, ink and one forest green. */
+:root {
+  color-scheme: light;
+  --paper: #f5f0e6;
+  --paper-2: #ede6d6;
+  --card: #fbf8f1;
+  --ink: #1d1b16;
+  --ink-2: #4a463c;
+  --muted: #6b6556;
+  --line: #d8cfbb;
+  --line-2: #c4b99f;
+
+  --brand: #1e4d3b;
+  --brand-2: #2b6a52;
+  --brand-ink: #f8f4ea;
+  --brand-soft: #dde8df;
+  --gold: #b9852a;
+  --gold-soft: #f1e3c0;
+  --danger: #a83a24;
+  --danger-soft: #f3dad2;
+  --warn: #8f610c;
+  --warn-soft: #f4e6c2;
+  --ok: #2b6a52;
+  --ok-soft: #dde8df;
+  --info: #2c4a6b;
+  --info-soft: #dce4ee;
+
+  --shadow-1: 0 1px 0 rgb(29 27 22 / 4%), 0 10px 28px -16px rgb(29 27 22 / 22%);
+  --shadow-2: 0 2px 0 rgb(29 27 22 / 4%), 0 24px 48px -20px rgb(29 27 22 / 30%);
+  --radius: 14px;
+  --radius-sm: 9px;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--brand) 28%, transparent);
+
+  --font-display: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --font-body: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.3  0 0 0 0 0.25  0 0 0 0 0.15  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.5'/></svg>");
+  --grain-opacity: 0.35;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #14130f;
+  --paper-2: #1b1913;
+  --card: #1e1c16;
+  --ink: #efe9da;
+  --ink-2: #cbc4b0;
+  --muted: #a39c88;
+  --line: #38342a;
+  --line-2: #4c4739;
+
+  --brand: #8cc3a5;
+  --brand-2: #a8d6bd;
+  --brand-ink: #0f1c16;
+  --brand-soft: #1f3328;
+  --gold: #e3b25b;
+  --gold-soft: #3a2f17;
+  --danger: #f09580;
+  --danger-soft: #3c211a;
+  --warn: #e0ad4e;
+  --warn-soft: #3a2f17;
+  --ok: #8cc3a5;
+  --ok-soft: #1f3328;
+  --info: #94b4d8;
+  --info-soft: #1d2a3b;
+
+  --shadow-1: 0 1px 0 rgb(0 0 0 / 30%), 0 12px 28px -16px rgb(0 0 0 / 60%);
+  --shadow-2: 0 2px 0 rgb(0 0 0 / 30%), 0 28px 50px -20px rgb(0 0 0 / 70%);
+  --grain-opacity: 0.12;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --paper: #14130f;
+    --paper-2: #1b1913;
+    --card: #1e1c16;
+    --ink: #efe9da;
+    --ink-2: #cbc4b0;
+    --muted: #a39c88;
+    --line: #38342a;
+    --line-2: #4c4739;
+
+    --brand: #8cc3a5;
+    --brand-2: #a8d6bd;
+    --brand-ink: #0f1c16;
+    --brand-soft: #1f3328;
+    --gold: #e3b25b;
+    --gold-soft: #3a2f17;
+    --danger: #f09580;
+    --danger-soft: #3c211a;
+    --warn: #e0ad4e;
+    --warn-soft: #3a2f17;
+    --ok: #8cc3a5;
+    --ok-soft: #1f3328;
+    --info: #94b4d8;
+    --info-soft: #1d2a3b;
+
+    --shadow-1: 0 1px 0 rgb(0 0 0 / 30%), 0 12px 28px -16px rgb(0 0 0 / 60%);
+    --shadow-2: 0 2px 0 rgb(0 0 0 / 30%), 0 28px 50px -20px rgb(0 0 0 / 70%);
+    --grain-opacity: 0.12;
+  }
+}

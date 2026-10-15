@@ -1,141 +1,42 @@
-# 🔐 Security Policy — Vaultara (GovDoc)
+# Security
 
-Vaultara is designed with a **privacy-first, security-centric architecture** to protect sensitive citizen documents and identity data.  
-This document outlines our security practices, supported versions, and responsible vulnerability disclosure process.
+Vaultara is in beta. Only the latest deployed version receives fixes.
 
----
+## Reporting a vulnerability
 
-## 🛡️ Supported Versions
+Please report problems privately through the repository's security advisory page ("Report a vulnerability" under the Security tab). Do not open a public issue. Include steps to reproduce, and allow a reasonable time for a fix before publishing details. Please do not access data that is not yours.
 
-Vaultara is currently in **BETA**.
+## How the system protects documents
 
-| Version | Status | Security Updates |
-|--------|--------|------------------|
-| Beta   | ✅ Supported | Active fixes & monitoring |
-| Legacy builds | ❌ Unsupported | No security patches |
+| Concern | Control | Where |
+|---|---|---|
+| Files at rest | AES-256-GCM, fresh random key per file, key wrapped by a master key from Secret Manager, ciphertext bound to the document and owner as additional data | `functions/src/crypto.js` |
+| File type | Decided from the file's first bytes (PDF, JPEG, PNG, WebP, HEIC), never from the name or browser type | `functions/src/sniff.js` |
+| Direct file access | `vault/` is closed to all clients. Files are served only by the `download` function after an access check | `storage.rules`, `functions/src/documents.js` |
+| Metadata access | Default-deny rules. Reads need a verified email and an ownership, share or family relationship | `firestore.rules` |
+| Writes | All writes to documents, shares, families and the audit log come from server code | `firestore.rules` |
+| Sharing | By email to a verified account, view only or download, optional end date, revocable, expired shares removed hourly | `functions/src/sharing.js` |
+| Family | Unguessable 8 character one-time codes (32^8 values), 48 hour expiry, 5 join attempts per hour, membership carried in a server-set claim | `functions/src/family.js` |
+| Audit trail | Written only by functions with a masked IP and browser name. Readable by the actor and the document owner | `functions/src/runtime.js` |
+| Sign in | Verified email required, password strength checks, passwordless link, TOTP second factor, password re-entry for sensitive actions | `src/services/auth.js` |
+| Abuse | Per-user rate limits on uploads, downloads, shares, invites and joins | `functions/src/runtime.js` |
+| Browser | Strict Content-Security-Policy with no inline scripts or styles, HSTS, frame denial, referrer and permissions policies. All dynamic markup is escaped by default | `firebase.json`, `src/lib/dom.js` |
 
-Only the latest deployed version is actively maintained.
+The controls are covered by automated tests: unit tests for the cryptography and validation, 35 rules tests on the Firestore emulator, and an end-to-end browser test. See the README.
 
----
+## Known limits (please read)
 
-## 🔒 Security Architecture Overview
+- **Not end-to-end encrypted.** The server must decrypt files so that sharing and family access work. Anyone who controls the deployed functions together with the master key could read stored files. Restrict who can deploy, who can read the secret, and who has project owner access.
+- **View only is advisory.** It removes the download button and the server refuses attachment downloads, but a person who can view a document can still photograph their screen.
+- **Master key loss is data loss.** Keep a secure backup. Key rotation is supported by the stored key version but no rotation job is shipped yet.
+- **Account enumeration by sharers.** Sharing tells an authenticated, rate-limited user whether an email has an account. Password reset does not reveal this.
+- **Storage rules** should be exercised once in a staging project, because the local Storage emulator's rules runtime is not available in every environment.
+- Vaultara is not formally certified against any standard.
 
-Vaultara employs **multi-layered security controls** across the client, backend, and database layers.
+## Operational checklist for deployers
 
-### 🔐 Authentication
-- Firebase Authentication (Email & Password)
-- Mandatory email verification for full access
-- Session-based access enforcement
-- Identity-bound document ownership
-
-### 🧾 Authorization
-- Owner-based access control (`ownerId`)
-- Granular document sharing permissions
-- Family-based inheritance using `familyId`
-- Explicit self-share prevention logic
-- Delete privileges restricted to document owners only
-
-### 🗂️ Data Storage Model
-- Documents stored as **Base64-encoded strings** inside Cloud Firestore
-- No raw files stored in public object storage
-- Strict client-side file size enforcement (≤ 500 KB)
-- Structured metadata separation from content
-
----
-
-## 🧠 Audit Logging & Traceability
-
-Vaultara maintains **immutable audit logs** for all high-risk operations:
-
-Tracked events include:
-- `LOGIN`
-- `UPLOAD`
-- `SHARE`
-- `DELETE`
-- `FAMILY_LINK`
-
-Each event records:
-- Server-side timestamp
-- Actor UID
-- Action type
-- Document reference (if applicable)
-- Context metadata (familyId, share target)
-
-This ensures **full traceability and non-repudiation**.
-
----
-
-## ⚠️ Known Security Considerations (Beta)
-
-### Base64 Storage
-- Base64 encoding is not encryption
-- Intended as a controlled storage mechanism, not cryptographic protection
-- Future releases may include client-side encryption (AES)
-
-### Firestore Rules
-Before production deployment:
-- `firestore.rules` MUST validate `request.auth.uid`
-- Ensure ownership checks for read/write/delete operations
-- Prevent unauthorized family access leakage
-
-Example enforcement logic:
-- Allow read if:
-  - `resource.data.ownerId == request.auth.uid`
-  - OR `request.auth.uid` exists in `sharedWith[]`
-  - OR `resource.data.familyId == user.familyId`
-
----
-
-## 🔍 Reporting a Vulnerability
-
-We take security research seriously and appreciate responsible disclosure.
-
-### 📧 Contact
-If you discover a vulnerability, please report it privately:
-
-**Email:** `security@vaultara.app`  
-*(or contact the project owner via GitHub)*
-
-### 📝 Include the Following
-- Clear description of the issue
-- Steps to reproduce
-- Potential impact assessment
-- Screenshots or logs (if applicable)
-
-⚠️ **Please do NOT open public GitHub issues for security vulnerabilities.**
-
----
-
-## 🚫 Out-of-Scope Issues
-
-The following are NOT considered security vulnerabilities:
-- UI/UX bugs
-- Rate limits triggered by excessive requests
-- Issues caused by modified client-side code
-- Vulnerabilities in unsupported versions
-
----
-
-## 🧬 Security Roadmap (Planned)
-
-- Client-side AES encryption before upload
-- Zero-knowledge document handling
-- Per-document encryption keys
-- Activity anomaly detection
-- PWA offline security hardening
-
----
-
-## 🤝 Responsible Disclosure Commitment
-
-We commit to:
-- Acknowledging valid reports promptly
-- Investigating responsibly
-- Issuing fixes as quickly as possible
-- Crediting researchers (with permission)
-
----
-
-<div align="center">
-  <sub>Security is a feature — not an afterthought.</sub>
-</div>
+1. Enable Firebase App Check and enforce it for Firestore, Storage and Functions.
+2. Limit project owners, enable audit logging in Google Cloud, and alert on Secret Manager access.
+3. Turn on Identity Platform multi-factor and consider requiring it.
+4. Review Firestore and Storage rules after every change with `npm run test:rules`.
+5. Set a budget alert. Functions and Storage are billed.

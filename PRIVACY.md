@@ -1,125 +1,50 @@
-# 🛡️ Privacy Policy — Vaultara (GovDoc)
+# Privacy notes
 
-Vaultara is a **privacy-first digital document vault** designed to protect sensitive citizen information.  
-This document explains **what data is collected**, **how it is used**, and **how user privacy is preserved**.
+Last updated October 2026. These notes describe what the code in this repository does. If you run your own deployment you are the operator and must publish your own policy.
 
----
+## What is stored
 
-## 📌 Privacy Principles
+- Your email address and the name you give.
+- Your documents, encrypted, and their details: title, category, tags, expiry date, size, file type and a SHA-256 fingerprint.
+- Shares you create or receive, with the other person's email, permission and end date.
+- Your family membership, if any.
+- An activity trail: sign ins, views, downloads, shares, edits, deletions and family changes, each with a time, a masked network address (last part removed) and a short browser name.
+- Short-lived counters used to rate limit actions.
 
-Vaultara is built on the following principles:
+## What is not stored
 
-- **Data Minimization** — collect only what is strictly required
-- **User Ownership** — users retain full control over their documents
-- **Transparency** — all access and actions are traceable
-- **Security by Design** — privacy is enforced at the architectural level
-- **No Commercial Exploitation** — user data is never sold or monetized
+- No advertising identifiers, analytics or tracking scripts.
+- No plaintext copies of your files. The upload inbox copy is deleted as soon as the encrypted file is written.
+- No payment details.
 
----
+## Who can see what
 
-## 📂 Data We Collect
+| Person | Can see |
+|---|---|
+| You | Everything you own, everything shared with you, and the trail of actions on your documents |
+| Someone you shared with | That document, until the end date, as view only or view and download |
+| Your family | Documents you mark as visible to the family |
+| Operators of the deployment | Metadata. They can technically decrypt files because the server holds the keys, so restrict and log that access. |
 
-### 🔑 Account Information
-- Email address (used for authentication)
-- Firebase UID (internal identifier)
-- Email verification status
+## Your controls
 
-### 📄 Document Data
-- User-uploaded documents encoded as **Base64 strings**
-- Document metadata:
-  - Name
-  - Category (Identity, Education, Health)
-  - Owner ID
-  - Family ID (if linked)
-  - Sharing metadata
+- Edit or delete any document. Deleting removes the encrypted file, its key and its shares.
+- Revoke any share. Leave or disband a family.
+- Export your records as JSON from Settings.
+- Delete your account from Settings. This removes your documents, keys, shares, profile, family membership and the activity entries you created, and then your sign in.
 
-### 🧾 Activity Metadata
-- Action logs for security events:
-  - Login
-  - Upload
-  - Share
-  - Delete
-  - Family linking
+## Retention
 
----
+Documents and records stay until you delete them. Expired shares and invites are removed within an hour. Activity entries stay until the account is deleted.
 
-## 🚫 Data We Do NOT Collect
+## Where data lives
 
-Vaultara does **NOT** collect:
-- Government-issued IDs directly
-- Biometric data
-- Location data
-- Device fingerprinting
-- Advertising identifiers
-- Third-party analytics or trackers
+Google Firebase services. Functions run in the Mumbai region (`asia-south1`) by default. Firestore and Cloud Storage live in the location chosen when the project was created.
 
----
+## Children
 
-## 🔐 How Data Is Used
+Vaultara is not designed for children under 13.
 
-Data is used exclusively to:
-- Authenticate users
-- Display owned and shared documents
-- Enable family-based access
-- Generate audit logs for traceability
-- Securely render the user dashboard
+## Contact
 
-No data is used for profiling, marketing, or behavioral analysis.
-
----
-
-## 🧠 Storage & Retention
-
-- Documents are stored in **Cloud Firestore**
-- Content is Base64-encoded (not encrypted in Beta)
-- Data is retained until explicitly deleted by the user
-- Deleted documents are permanently removed from active storage
-
-Future versions may implement encrypted backups and retention controls.
-
----
-
-## 👨‍👩‍👧‍👦 Family & Sharing Privacy
-
-- Family linking is **opt-in**
-- Only documents tagged with a `familyId` are visible to linked members
-- Users cannot access documents without explicit ownership, sharing, or family linkage
-- Self-sharing is explicitly blocked to prevent redundancy and abuse
-
----
-
-## 🔍 User Rights
-
-Users have the right to:
-- View all stored personal data
-- Delete documents permanently
-- Leave a family group at any time
-- Revoke shared access
-- Close their account and remove associated data
-
----
-
-## ⚠️ Beta Privacy Notice
-
-Vaultara is currently in **BETA**.
-
-Known limitations:
-- Base64 encoding is not cryptographic encryption
-- Firestore security rules must be reviewed before production deployment
-
-Users are advised not to store irreplaceable or highly sensitive documents until encryption is implemented.
-
----
-
-## 📧 Privacy Contact
-
-For privacy-related concerns or data requests:
-
-**Email:** `privacy@vaultara.app`  
-(or contact the project maintainer via GitHub)
-
----
-
-<div align="center">
-  <sub>Your documents. Your control. Your privacy.</sub>
-</div>
+Open an issue on the repository for privacy questions.
