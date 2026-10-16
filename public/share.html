@@ -3,52 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Share | Vaultara</title>
+    <meta name="theme-color" content="#F6F3EC">
+    <title>Share a document | Vaultara</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+    <link rel="stylesheet" href="vendor/phosphor/style.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="app-layout">
-        <aside class="sidebar">
-            <div><div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 40px;">🔐 Vaultara</div>
-            <a href="dashboard.html" class="btn-tab">Back to Dashboard</a></div>
-        </aside>
+    <a href="#main" class="skip-link">Skip to content</a>
 
-        <main class="main-content">
-            <h1 style="margin-bottom: 24px;">Family Sharing</h1>
-            
-            <div class="ui-card anim-stagger-1" style="max-width: 600px;">
-                <p style="color: var(--gov-slate); margin-bottom: 24px;">
-                    Grant secure access to specific users via their email address.
-                </p>
+    <div class="app">
+        <aside class="sidebar" id="sidebar"></aside>
 
-                <form id="shareForm">
-                    <div class="form-group">
-                        <label>Select Document</label>
-                        <select id="docSelect" required><option>Loading Vault...</option></select>
+        <main class="main" id="main">
+            <div class="main-inner">
+                <header class="page-head reveal">
+                    <div>
+                        <h1>Share a document</h1>
+                        <p>Give one person access to one document, using their email address. You can only share documents you own.</p>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>Receiver Email Address</label>
-                        <input type="email" id="receiverEmail" placeholder="family.member@example.com" required>
-                    </div>
-                    
-                    <div id="shareStatus" style="margin-bottom: 24px; font-weight: 600;"></div>
-                    
-                    <button type="submit" class="btn-primary-reveal">
-                        <span class="btn-text-initial">Grant Access</span>
-                        <div class="btn-bg-reveal"></div>
-                        <div class="btn-text-reveal">
-                            <span>Confirm Share</span>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </header>
+
+                <div class="panel panel-narrow reveal reveal-1">
+                    <div class="banner hidden" id="shareNote" role="note">
+                        <div class="banner-text">
+                            <i class="ph-bold ph-warning" aria-hidden="true"></i>
+                            <p>Your own email is not verified yet. You can still share, but people you share with must verify theirs to open the document.</p>
                         </div>
-                    </button>
-                </form>
+                    </div>
+
+                    <form id="shareForm" novalidate>
+                        <div class="form-group">
+                            <label for="docSelect">Document</label>
+                            <select id="docSelect" name="document" required><option value="">Loading your documents</option></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="receiverEmail">Their email address</label>
+                            <input type="email" id="receiverEmail" name="recipient" placeholder="family.member@example.com" autocomplete="off" autocapitalize="none" spellcheck="false" required>
+                            <p class="hint">They will see the document in their own vault after signing in with this email.</p>
+                        </div>
+
+                        <div class="status" id="shareStatus" role="status" aria-live="polite"></div>
+
+                        <button type="submit" class="btn btn-primary" id="shareBtn">
+                            <i class="ph-bold ph-share-network" aria-hidden="true"></i>Share document
+                        </button>
+                    </form>
+                </div>
             </div>
         </main>
-        
-        <nav class="mobile-nav">
-             <a href="dashboard.html" class="btn-tab">Back</a>
-        </nav>
+
+        <nav class="mobile-nav" id="mobileNav"></nav>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -58,6 +67,7 @@
     <script src="js/utils.js"></script>
     <script src="js/logger.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/shell.js"></script>
     <script src="js/share.js"></script>
 </body>
 </html>
