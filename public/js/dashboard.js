@@ -29,6 +29,9 @@ window.sendVerification = async () => {
     }
 };
 
+const sendVerifyBtn = document.getElementById('sendVerifyBtn');
+if (sendVerifyBtn) sendVerifyBtn.addEventListener('click', () => window.sendVerification());
+
 auth.onAuthStateChanged(async user => {
     if (!user) return;
     const myEmail = (user.email || '').toLowerCase();
@@ -104,8 +107,9 @@ function renderError() {
             <i class="ph-bold ph-warning-circle" aria-hidden="true"></i>
             <h2>We could not load your vault</h2>
             <p>Check your connection and try again. If it keeps happening, sign out and back in.</p>
-            <button type="button" class="btn btn-secondary" onclick="location.reload()">Try again</button>
+            <button type="button" class="btn btn-secondary" id="retryBtn">Try again</button>
         </div>`;
+    document.getElementById('retryBtn').addEventListener('click', () => location.reload());
 }
 
 function renderEmpty(filtered) {
