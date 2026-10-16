@@ -32,7 +32,7 @@ shareForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const docId = docSelect.value;
-    const rawReceiver = document.getElementById('receiverEmail').value.trim(); // Changed ID
+    const rawReceiver = document.getElementById('receiverEmail').value.trim().toLowerCase(); // lowercase so it matches the auth email
     
     if(!docId) {
         alert("Please select a document.");
@@ -40,7 +40,7 @@ shareForm.addEventListener('submit', async (e) => {
     }
     
     // Basic Email Validation
-    if(!rawReceiver.includes('@') || !rawReceiver.includes('.')) {
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawReceiver) || rawReceiver.length > 254) {
         alert("Please enter a valid email address.");
         return;
     }

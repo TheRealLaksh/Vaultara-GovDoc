@@ -7,8 +7,7 @@ const familyIdInput = document.getElementById('familyId');
 const profileForm = document.getElementById('profileForm');
 
 window.generateRandomId = () => {
-    const randomCode = 'FAM-' + Math.floor(1000 + Math.random() * 9000);
-    if(familyIdInput) familyIdInput.value = randomCode;
+    if(familyIdInput) familyIdInput.value = generateFamilyId();
 };
 
 auth.onAuthStateChanged(async (user) => {
@@ -59,10 +58,19 @@ if(profileForm) {
     profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const user = auth.currentUser;
-        const name = nameInput.value;
+        const name = nameInput.value.trim();
         const familyId = familyIdInput.value.toUpperCase().trim();
 
         if (!user) return;
+
+        if (familyId && !isValidFamilyId(familyId)) {
+            alert("Family ID must look like FAM-XXXXXXXXXXXXXXXX (12-32 letters/numbers). Use Generate to create a secure one.");
+            return;
+        }
+        if (name.length > 100) {
+            alert("Name is too long.");
+            return;
+        }
 
         const btn = e.target.querySelector('button');
         const originalContent = btn.innerHTML;

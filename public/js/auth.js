@@ -23,7 +23,7 @@ auth.onAuthStateChanged(user => {
             navLinks.innerHTML = `<li><a href="dashboard.html" class="btn">Go to Dashboard</a></li>`;
         } else {
             navLinks.innerHTML = `<li><a href="login.html">Login</a></li>
-                                  <li><a href="register.html" class="btn btn-secondary">Register</a></li>`;
+                                  <li><a href="login.html" class="btn btn-secondary">Register</a></li>`;
         }
     }
 });
