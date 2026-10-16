@@ -7,7 +7,7 @@ function toggleMode() {
 }
 
 async function handleAuth(mode) {
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim().toLowerCase();
     const password = document.getElementById('password').value;
     const errorDiv = document.getElementById('authError');
     
@@ -18,8 +18,8 @@ async function handleAuth(mode) {
         return;
     }
 
-    if (password.length < 6) {
-        errorDiv.innerText = "Password must be at least 6 characters.";
+    if (mode === 'register' && (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password))) {
+        errorDiv.innerText = "Password must be at least 8 characters and include a letter and a number.";
         return;
     }
 
@@ -46,6 +46,8 @@ async function handleAuth(mode) {
                 aadhaarLinked: false
             });
             if(window.Logger) await Logger.log("REGISTER", "New user account created");
+            // Sharing and family access only work for verified emails, so send the link straight away.
+            try { await user.sendEmailVerification(); } catch (e) { console.warn("Verification email not sent", e); }
         }
         
         window.location.href = "dashboard.html";
@@ -55,8 +57,10 @@ async function handleAuth(mode) {
         let msg = error.message;
         
         // Friendly Error Messages
-        if (error.code === 'auth/wrong-password') msg = "Incorrect password.";
-        if (error.code === 'auth/user-not-found') msg = "No account found with this email.";
+        // With email-enumeration protection on, Firebase reports both cases as invalid-credential.
+        if (['auth/wrong-password', 'auth/user-not-found', 'auth/invalid-credential'].includes(error.code)) msg = "Incorrect email or password.";
+        if (error.code === 'auth/too-many-requests') msg = "Too many attempts. Please wait a few minutes and try again.";
+        if (error.code === 'auth/weak-password') msg = "Password is too weak. Use 8+ characters with a letter and a number.";
         if (error.code === 'auth/email-already-in-use') msg = "Email already registered. Try logging in.";
         if (error.code === 'auth/invalid-email') msg = "Invalid email address format.";
         

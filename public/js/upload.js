@@ -10,6 +10,18 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
 
     if (!file) return;
 
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+        statusDiv.textContent = "Error: only PDF, JPEG or PNG files are allowed.";
+        statusDiv.style.color = "red";
+        return;
+    }
+    if (!title.trim() || title.length > 120) {
+        statusDiv.textContent = "Error: title must be 1-120 characters.";
+        statusDiv.style.color = "red";
+        return;
+    }
+
     if (file.size > 500 * 1024) {
         alert("⚠️ File too large! Please upload files smaller than 500KB.");
         statusDiv.textContent = "Error: File exceeds 500KB limit.";
@@ -36,7 +48,7 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             await db.collection('documents').add({
                 ownerId: user.uid,
                 familyId: myFamilyId, // <--- New Field for Linking
-                fileName: title,
+                fileName: title.trim(),
                 category: category,
                 fileType: file.type,
                 fileData: base64String,
