@@ -3,35 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vaultara | Citizen Document Secure</title>
+    <meta name="theme-color" content="#F6F3EC">
+    <title>Vaultara | Your documents, kept safe</title>
+    <meta name="description" content="Keep identity, education and health documents in one private vault, share each one with exactly the people you choose, and see a record of everything that happens.">
+    <meta property="og:title" content="Vaultara | Your documents, kept safe">
+    <meta property="og:description" content="A private vault for identity, education and health documents, with sharing by verified email and a full activity record.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+    <link rel="stylesheet" href="vendor/phosphor/style.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/landing.css">
+    <script>document.documentElement.classList.add('js');</script>
 </head>
-<body style="display:flex; align-items:center; justify-content:center; text-align:center;">
+<body>
+    <a href="#how" class="skip-link">Skip to content</a>
 
-    <div class="main-content" style="max-width: 600px;">
-        <div class="anim-stagger-1" style="font-size: 4rem; margin-bottom: 20px;">🔐</div>
-        
-        <h1 class="anim-stagger-2" style="font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.05em;">
-            Vaultara
-        </h1>
-        
-        <p class="anim-stagger-3" style="color: var(--gov-graphite); font-size: 1.1rem; line-height: 1.6; margin-bottom: 40px;">
-            The official secure repository for citizen document management and family sharing. 
-            Encrypted, auditable, and accessible.
-        </p>
-
-        <div class="anim-stagger-3" style="display:flex; justify-content:center;">
-            <a href="login.html" class="btn-primary-reveal">
-                <span class="btn-text-initial">Access Vault</span>
-                <div class="btn-bg-reveal"></div>
-                <div class="btn-text-reveal">
-                    <span>Login / Register</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                </div>
+    <header class="topbar">
+        <div class="wrap">
+            <a href="index.html" class="brand" aria-label="Vaultara home" translate="no">
+                <span class="brand-mark"><i class="ph-bold ph-vault" aria-hidden="true"></i></span>Vaultara
             </a>
+            <nav aria-label="Main">
+                <a href="#how">How it works</a>
+                <a href="#security">Security</a>
+                <a href="login.html" class="btn btn-primary btn-sm">Open your vault</a>
+            </nav>
         </div>
-    </div>
+    </header>
 
-    <script src="js/firebase-config.js"></script>
+    <main>
+        <section class="hero">
+            <div class="hero-bg" aria-hidden="true">
+                <span class="sheet s-id"     style="--x:66%; --y:-2%; --w:11vw; --r:9deg;   --dx:-18px; --dy:26px;  --dr:-3deg; --t:19s; --d:-3s;"><i></i><i></i><i></i><i></i></span>
+                <span class="sheet s-edu"    style="--x:79%; --y:12%; --w:9vw;  --r:-7deg;  --dx:20px;  --dy:18px;  --dr:4deg;  --t:23s; --d:-9s;"><i></i><i></i><i></i></span>
+                <span class="sheet s-health" style="--x:89%; --y:-4%; --w:8vw;  --r:13deg;  --dx:-14px; --dy:30px;  --dr:-5deg; --t:17s; --d:-6s;"><i></i><i></i><i></i></span>
+                <span class="sheet s-green"  style="--x:91%; --y:34%; --w:7vw;  --r:-10deg; --dx:-22px; --dy:-16px; --dr:5deg;  --t:21s; --d:-12s;"><i></i><i></i></span>
+                <span class="sheet s-family" style="--x:2%;  --y:76%; --w:8vw;  --r:-9deg;  --dx:18px;  --dy:-20px; --dr:4deg;  --t:25s; --d:-4s;"><i></i><i></i><i></i></span>
+                <span class="sheet s-edu"    style="--x:13%; --y:88%; --w:6vw;  --r:6deg;   --dx:-12px; --dy:-18px; --dr:-4deg; --t:18s; --d:-10s;"><i></i><i></i></span>
+                <span class="sheet s-id"     style="--x:44%; --y:82%; --w:7vw;  --r:14deg;  --dx:16px;  --dy:-24px; --dr:-6deg; --t:22s; --d:-2s;"><i></i><i></i><i></i></span>
+                <span class="sheet s-health" style="--x:55%; --y:-3%; --w:6vw;  --r:-12deg; --dx:12px;  --dy:22px;  --dr:5deg;  --t:20s; --d:-7s;"><i></i><i></i></span>
+            </div>
+            <div class="wrap">
+                <h1 class="reveal">Your documents, kept safe.</h1>
+
+                <div class="hero-grid">
+                    <div class="hero-copy rv">
+                        <p>Vaultara holds your identity, education and health records, lets you share each one with exactly the people you choose, and keeps a record of everything that happens.</p>
+                        <div class="hero-actions">
+                            <a href="login.html?mode=register" class="btn btn-primary btn-lg">Create your vault<i class="ph-bold ph-arrow-right" aria-hidden="true"></i></a>
+                            <a href="login.html" class="text-link">Sign in</a>
+                        </div>
+                        <button type="button" class="motion-toggle" id="motionToggle" aria-pressed="false">
+                            <i class="ph-bold ph-pause" aria-hidden="true"></i><span>Pause background motion</span>
+                        </button>
+                    </div>
+
+                    <div class="rv" style="--d:2;" aria-label="A preview of the vault with three sample documents" role="group">
+                        <div class="frag-stack" data-ui>
+                            <article class="doc-card">
+                                <div class="doc-top">
+                                    <div class="doc-tile" data-cat="Identity"><i class="ph-bold ph-identification-card" aria-hidden="true"></i></div>
+                                    <div><div class="doc-title">Aadhaar card</div><p class="doc-meta">Identity &middot; 12 Aug 2026</p></div>
+                                </div>
+                                <div class="doc-foot"><span class="badge badge-owner"><i class="ph-bold ph-lock-simple" aria-hidden="true"></i>Yours</span><span class="btn btn-ghost btn-sm"><i class="ph-bold ph-download-simple" aria-hidden="true"></i>Download</span></div>
+                            </article>
+                            <article class="doc-card">
+                                <div class="doc-top">
+                                    <div class="doc-tile" data-cat="Education"><i class="ph-bold ph-graduation-cap" aria-hidden="true"></i></div>
+                                    <div><div class="doc-title">Class XII marksheet</div><p class="doc-meta">Education &middot; 3 Sep 2026</p></div>
+                                </div>
+                                <div class="doc-foot"><span class="badge badge-shared"><i class="ph-bold ph-share-network" aria-hidden="true"></i>Shared with you</span><span class="btn btn-ghost btn-sm"><i class="ph-bold ph-download-simple" aria-hidden="true"></i>Download</span></div>
+                            </article>
+                            <article class="doc-card">
+                                <div class="doc-top">
+                                    <div class="doc-tile" data-cat="Health"><i class="ph-bold ph-heartbeat" aria-hidden="true"></i></div>
+                                    <div><div class="doc-title">Vaccination record</div><p class="doc-meta">Health &middot; 21 Sep 2026</p></div>
+                                </div>
+                                <div class="doc-foot"><span class="badge badge-family"><i class="ph-bold ph-users-three" aria-hidden="true"></i>Family</span><span class="btn btn-ghost btn-sm"><i class="ph-bold ph-download-simple" aria-hidden="true"></i>Download</span></div>
+                            </article>
+                        </div>
+                        <p class="frag-label">Sample documents shown for illustration.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="how" class="wrap" aria-label="How it works">
+            <div class="row">
+                <div class="row-text rv">
+                    <h2>Upload once, find it in seconds.</h2>
+                    <p>Add a PDF, JPEG or PNG, give it a name and a category, and it is in your vault. Search by name or filter by category whenever you need it.</p>
+                    <ul class="facts">
+                        <li><i class="ph-bold ph-check-circle" aria-hidden="true"></i>Identity, education and health categories</li>
+                        <li><i class="ph-bold ph-check-circle" aria-hidden="true"></i>Files up to 500 KB, checked before they are saved</li>
+                    </ul>
+                </div>
+                <div class="frag rv" style="--d:2;" data-ui aria-hidden="true">
+                    <div class="tile-row">
+                        <div class="tile-id"><i class="ph-bold ph-identification-card"></i>Identity</div>
+                        <div class="tile-edu"><i class="ph-bold ph-graduation-cap"></i>Education</div>
+                        <div class="tile-health"><i class="ph-bold ph-heartbeat"></i>Health</div>
+                    </div>
+                    <div class="dropzone">
+                        <i class="ph-bold ph-cloud-arrow-up"></i>
+                        <strong>Drop a file here or choose one</strong>
+                        <small>PDF, JPEG or PNG, up to 500 KB</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row flip">
+                <div class="row-text rv">
+                    <h2>Share with exactly one person.</h2>
+                    <p>Pick a document, enter an email address, and only that person can open it. They need a verified email, so a stranger cannot sign up as them.</p>
+                    <ul class="facts">
+                        <li><i class="ph-bold ph-check-circle" aria-hidden="true"></i>Family ID links the people in your household</li>
+                        <li><i class="ph-bold ph-check-circle" aria-hidden="true"></i>Only the owner can delete or change who has access</li>
+                    </ul>
+                </div>
+                <div class="frag rv" style="--d:2;" data-ui aria-hidden="true">
+                    <div class="form-group"><span class="label">Document</span><select><option>Class XII marksheet</option></select></div>
+                    <div class="form-group"><span class="label">Their email address</span><input type="email" value="family.member@example.com" tabindex="-1" readonly></div>
+                    <span class="btn btn-primary"><i class="ph-bold ph-share-network"></i>Share document</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="row-text rv">
+                    <h2>Every action leaves a record.</h2>
+                    <p>Sign-ins, uploads, shares and deletions are written to an activity log that you can read and nobody can edit, so you can always see what happened and when.</p>
+                </div>
+                <div class="frag rv" style="--d:2;" data-ui aria-hidden="true">
+                    <ul class="log-list">
+                        <li class="log-row"><span class="log-time">16 Oct 2026, 09:12</span><span class="badge log-badge" data-action="SHARE">Share</span><span class="log-detail">Shared 'Class XII marksheet' with family.member@example.com</span></li>
+                        <li class="log-row"><span class="log-time">16 Oct 2026, 09:08</span><span class="badge log-badge" data-action="UPLOAD">Upload</span><span class="log-detail">Uploaded Vaccination record (Health)</span></li>
+                        <li class="log-row"><span class="log-time">16 Oct 2026, 09:05</span><span class="badge log-badge" data-action="LOGIN">Signed in</span><span class="log-detail">User logged in securely</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="security" class="band" aria-label="Security">
+            <div class="wrap">
+                <h2 class="rv">What keeps your documents private.</h2>
+                <div class="band-grid">
+                    <div class="rv"><h3>Private by default</h3><p>An uploaded document can be read only by the account that owns it, until the owner shares it.</p></div>
+                    <div class="rv" style="--d:1;"><h3>Sharing needs a verified email</h3><p>People you share with, and members of your family group, only see documents after they verify their email address.</p></div>
+                    <div class="rv" style="--d:2;"><h3>Family IDs work like passwords</h3><p>A Family ID is 16 random characters. Anyone who has it can see documents tagged to it, so share it only with people you trust.</p></div>
+                    <div class="rv" style="--d:3;"><h3>Encrypted in transit and at rest</h3><p>Vaultara runs on Google Firebase, which encrypts data in transit and at rest. Access rules are enforced on the server, not just in the page.</p></div>
+                </div>
+                <p class="band-note rv">Vaultara is a student project. It is not affiliated with any government body and does not replace official services such as DigiLocker.</p>
+            </div>
+        </section>
+
+        <section class="close wrap" aria-label="Get started">
+            <h2 class="rv">Start with one document.</h2>
+            <div class="hero-actions rv" style="--d:1;">
+                <a href="login.html?mode=register" class="btn btn-primary btn-lg">Create your vault<i class="ph-bold ph-arrow-right" aria-hidden="true"></i></a>
+                <a href="login.html" class="text-link">Sign in</a>
+            </div>
+            <span class="wordmark" aria-hidden="true">Vaultara</span>
+        </section>
+    </main>
+
+    <footer class="wrap foot">
+        <span>A student project. Not affiliated with any government body.</span>
+        <nav aria-label="Footer">
+            <a href="https://github.com/TheRealLaksh/Vaultara-GovDoc/blob/main/PRIVACY.md" rel="noopener">Privacy</a>
+            <a href="https://github.com/TheRealLaksh/Vaultara-GovDoc/blob/main/SECURITY.md" rel="noopener">Security policy</a>
+            <a href="https://github.com/TheRealLaksh/Vaultara-GovDoc" rel="noopener">Source</a>
+        </nav>
+    </footer>
+
+    <script src="js/landing.js"></script>
 </body>
 </html>
