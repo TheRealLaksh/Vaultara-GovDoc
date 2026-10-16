@@ -88,6 +88,10 @@ Notes:
 - Set an App Check provider and enable enforcement if you expect abuse. The functions already rate limit every sensitive action per user.
 - Storage rules cannot be exercised by the local emulator in every environment. Test `storage.rules` once in a staging project.
 
+## Handoff
+
+Status, decisions, known gaps and next steps for the next maintainer are in [HANDOFF.md](HANDOFF.md).
+
 ## Legacy
 
 The original 2025 build (vanilla pages on the compat SDK, files stored as Base64 in Firestore, rules that let any signed-in user read everything) is described in [docs/AUDIT.md](docs/AUDIT.md). The rebuild plan is in [docs/PLAN.md](docs/PLAN.md).
