@@ -1,60 +1,86 @@
 checkAuth();
 
-const profilePhone = document.getElementById('profilePhone');
+const profileEmail = document.getElementById('profileEmail');
 const verifyBadge = document.getElementById('verifyBadge');
+const resendVerify = document.getElementById('resendVerify');
 const nameInput = document.getElementById('fullName');
 const familyIdInput = document.getElementById('familyId');
 const profileForm = document.getElementById('profileForm');
+const profileStatus = document.getElementById('profileStatus');
+const generateBtn = document.getElementById('generateFamily');
+const copyBtn = document.getElementById('copyFamily');
 
 window.generateRandomId = () => {
-    if(familyIdInput) familyIdInput.value = generateFamilyId();
+    if (familyIdInput) familyIdInput.value = generateFamilyId();
 };
+if (generateBtn) generateBtn.addEventListener('click', window.generateRandomId);
+
+if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+        const id = familyIdInput.value.trim();
+        if (!id) { toast('Nothing to copy yet. Generate a Family ID first.', 'error'); return; }
+        try {
+            await navigator.clipboard.writeText(id);
+            toast('Family ID copied.');
+        } catch (e) {
+            familyIdInput.select();
+            toast('Press Ctrl+C to copy the selected ID.', 'info');
+        }
+    });
+}
 
 auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        // 1. Display Email
-        if(profilePhone) profilePhone.innerText = user.email;
+    if (!user) return;
 
-        // 2. Update Verification Badge
-        if(verifyBadge) {
-            if(user.emailVerified) {
-                verifyBadge.innerText = "Verified Citizen";
-                verifyBadge.style.backgroundColor = "#dcfce7";
-                verifyBadge.style.color = "#166534";
-            } else {
-                verifyBadge.innerText = "Unverified";
-                verifyBadge.style.backgroundColor = "#fef3c7";
-                verifyBadge.style.color = "#b45309";
-                
-                // Make it clickable to resend
-                verifyBadge.style.cursor = "pointer";
-                verifyBadge.title = "Click to send verification email";
-                verifyBadge.onclick = async () => {
-                    await user.sendEmailVerification();
-                    alert("Verification link sent!");
+    // 1. Display email
+    if (profileEmail) profileEmail.textContent = user.email;
+
+    // 2. Verification badge
+    if (verifyBadge) {
+        if (user.emailVerified) {
+            verifyBadge.className = 'badge badge-ok';
+            verifyBadge.innerHTML = '<i class="ph-bold ph-seal-check" aria-hidden="true"></i>Email verified';
+            if (resendVerify) resendVerify.classList.add('hidden');
+        } else {
+            verifyBadge.className = 'badge badge-warn';
+            verifyBadge.innerHTML = '<i class="ph-bold ph-warning" aria-hidden="true"></i>Email not verified';
+            if (resendVerify) {
+                resendVerify.classList.remove('hidden');
+                resendVerify.onclick = async () => {
+                    try {
+                        await user.sendEmailVerification();
+                        toast('Verification link sent. Check your inbox and spam folder.');
+                    } catch (e) {
+                        console.error(e);
+                        toast('Could not send the link. Please try again in a minute.', 'error');
+                    }
                 };
             }
         }
+    }
 
-        // 3. Fetch existing profile data
-        try {
-            const doc = await db.collection('users').doc(user.uid).get();
-            
-            if (doc.exists) {
-                const data = doc.data();
-                if(data.name && nameInput) nameInput.value = data.name;
-                
-                if(data.familyId && familyIdInput) {
-                    familyIdInput.value = data.familyId;
+    // 3. Fetch existing profile data
+    try {
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+            const data = doc.data();
+            if (data.name && nameInput) nameInput.value = data.name;
+            if (data.familyId && familyIdInput) {
+                familyIdInput.value = data.familyId;
+                if (!isValidFamilyId(data.familyId)) {
+                    setStatus(profileStatus,
+                        'Your Family ID uses the old short format, which no longer gives access. Generate a new one and share it with your family.',
+                        'info');
                 }
-            } 
-        } catch (error) {
-            console.error("Error fetching profile:", error);
+            }
         }
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        setStatus(profileStatus, 'We could not load your profile. Refresh and try again.', 'error');
     }
 });
 
-if(profileForm) {
+if (profileForm) {
     profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const user = auth.currentUser;
@@ -62,19 +88,18 @@ if(profileForm) {
         const familyId = familyIdInput.value.toUpperCase().trim();
 
         if (!user) return;
+        setStatus(profileStatus, '');
 
         if (familyId && !isValidFamilyId(familyId)) {
-            alert("Family ID must look like FAM-XXXXXXXXXXXXXXXX (12-32 letters/numbers). Use Generate to create a secure one.");
+            setStatus(profileStatus, 'A Family ID looks like FAM-XXXXXXXXXXXXXXXX (12 to 32 letters and numbers). Use Generate to create one.', 'error');
             return;
         }
         if (name.length > 100) {
-            alert("Name is too long.");
+            setStatus(profileStatus, 'That name is too long.', 'error');
             return;
         }
 
-        const btn = e.target.querySelector('button');
-        const originalContent = btn.innerHTML;
-        btn.innerHTML = `<span style="color:white;">Saving...</span>`;
+        const btn = document.getElementById('saveProfile');
         btn.disabled = true;
 
         try {
@@ -84,16 +109,16 @@ if(profileForm) {
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
             }, { merge: true });
 
-            if(window.Logger) {
-                await Logger.log("PROFILE_UPDATE", `Updated profile. Family ID: ${familyId || 'None'}`);
+            if (window.Logger) {
+                await Logger.log('PROFILE_UPDATE', `Updated profile. Family ID: ${familyId || 'None'}`);
             }
 
-            alert("Profile Updated!");
+            familyIdInput.value = familyId;
+            toast('Profile saved.');
         } catch (error) {
             console.error(error);
-            alert("Error: " + error.message);
+            setStatus(profileStatus, 'Could not save your profile. Please try again.', 'error');
         } finally {
-            btn.innerHTML = originalContent;
             btn.disabled = false;
         }
     });
