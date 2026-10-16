@@ -1,19 +1,115 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Existing Rules
-    match /documents/{docId} {
-      allow read, write: if request.auth != null;
-    }
-    match /logs/{logId} {
-      allow read, write: if request.auth != null;
+
+    function signedIn() {
+      return request.auth != null;
     }
 
-    // NEW RULE: User Profiles
+    // Shared/family access only counts once the account's email is verified,
+    // so nobody can register someone else's email address and read what was shared to it.
+    function verified() {
+      return signedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(data) {
+      return signedIn() && data.ownerId == request.auth.uid;
+    }
+
+    function validFamilyId(id) {
+      return id is string && id.matches('^FAM-[A-Z0-9]{12,32}$');
+    }
+
+    // Family ID saved on the signed-in user's own profile ('' if none).
+    function myFamilyId() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('familyId', '')
+        : '';
+    }
+
+    // ---------------------------------------------------------------
+    // Citizen documents
+    // ---------------------------------------------------------------
+    match /documents/{docId} {
+
+      // Owner, anyone the owner shared it with (verified email), or the owner's family (verified).
+      allow read: if signedIn() && (
+        resource.data.ownerId == request.auth.uid
+        || (verified()
+            && request.auth.token.email in resource.data.get('sharedWith', []))
+        || (verified()
+            && validFamilyId(resource.data.get('familyId', null))
+            && resource.data.familyId == myFamilyId())
+      );
+
+      // Uploads: fixed fields only, owner = uploader, small PDF/JPEG/PNG data URL.
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(
+             ['ownerId', 'familyId', 'fileName', 'category', 'fileType', 'fileData', 'createdAt', 'sharedWith'])
+        && request.resource.data.keys().hasAll(
+             ['ownerId', 'fileName', 'category', 'fileType', 'fileData', 'createdAt'])
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.fileName is string
+        && request.resource.data.fileName.size() > 0
+        && request.resource.data.fileName.size() <= 120
+        && request.resource.data.category in ['Identity', 'Education', 'Health']
+        && request.resource.data.fileType in ['image/jpeg', 'image/png', 'application/pdf']
+        && request.resource.data.fileData is string
+        && request.resource.data.fileData.size() <= 700000
+        && request.resource.data.fileData.matches('^data:(image/jpeg|image/png|application/pdf);base64,[A-Za-z0-9+/=]+$')
+        && (!('familyId' in request.resource.data)
+            || request.resource.data.familyId == null
+            || request.resource.data.familyId == myFamilyId())
+        && (!('sharedWith' in request.resource.data)
+            || (request.resource.data.sharedWith is list && request.resource.data.sharedWith.size() == 0));
+
+      // Only the owner may change a document, and only its sharedWith list (max 20 emails).
+      allow update: if isOwner(resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sharedWith'])
+        && request.resource.data.sharedWith is list
+        && request.resource.data.sharedWith.size() <= 20;
+
+      allow delete: if isOwner(resource.data);
+    }
+
+    // ---------------------------------------------------------------
+    // Audit log: append-only, each user reads only their own entries
+    // ---------------------------------------------------------------
+    match /logs/{logId} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['userId', 'action', 'description', 'timestamp'])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.timestamp == request.time
+        && request.resource.data.action in
+             ['LOGIN', 'LOGOUT', 'REGISTER', 'UPLOAD', 'SHARE', 'DELETE', 'PROFILE_UPDATE']
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 300;
+
+      allow update, delete: if false;
+    }
+
+    // ---------------------------------------------------------------
+    // User profiles: own profile only, fixed fields, validated Family ID
+    // ---------------------------------------------------------------
     match /users/{userId} {
-      // Users can only read/write their OWN profile (userId matches auth.uid)
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, delete: if signedIn() && request.auth.uid == userId;
+
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(
+             ['email', 'name', 'familyId', 'createdAt', 'updatedAt', 'aadhaarLinked'])
+        && (!('email' in request.resource.data)
+            || request.resource.data.email.lower() == request.auth.token.email.lower())
+        && (!('name' in request.resource.data)
+            || (request.resource.data.name is string && request.resource.data.name.size() <= 100))
+        && (!('familyId' in request.resource.data)
+            || request.resource.data.familyId == ''
+            || validFamilyId(request.resource.data.familyId))
+        && (!('aadhaarLinked' in request.resource.data)
+            || request.resource.data.aadhaarLinked == false);
     }
   }
 }
