@@ -25,7 +25,7 @@ window.sendVerification = async () => {
 
 auth.onAuthStateChanged(async user => {
     if (user) {
-        const myEmail = user.email; 
+        const myEmail = (user.email || '').toLowerCase(); 
         
         // CHECK VERIFICATION STATUS
         if (!user.emailVerified && verifyBanner) {
@@ -36,32 +36,37 @@ auth.onAuthStateChanged(async user => {
         }
 
         try {
+            // Shared and family access need a verified email (enforced by the security rules).
+            // After clicking the email link, refresh the token so the rules see the change.
+            if (!user.emailVerified) {
+                await user.reload();
+                if (user.emailVerified) {
+                    await user.getIdToken(true);
+                    if (verifyBanner) verifyBanner.classList.add('hidden');
+                }
+            }
+
             // 1. Get User Profile for Family ID
             let myFamilyId = null;
             const userDoc = await db.collection('users').doc(user.uid).get();
             if(userDoc.exists) myFamilyId = userDoc.data().familyId;
 
-            // 2. Prepare Queries
-            const queries = [
-                db.collection('documents').where('ownerId', '==', user.uid).get(),
-                db.collection('documents').where('sharedWith', 'array-contains', myEmail).get()
-            ];
+            // 2. Owned documents always; shared + family only for verified accounts
+            const empty = { docs: [] };
+            const ownedQ = db.collection('documents').where('ownerId', '==', user.uid).get();
+            const sharedQ = user.emailVerified
+                ? db.collection('documents').where('sharedWith', 'array-contains', myEmail).get()
+                : Promise.resolve(empty);
+            const familyQ = (user.emailVerified && myFamilyId && isValidFamilyId(myFamilyId))
+                ? db.collection('documents').where('familyId', '==', myFamilyId).get()
+                : Promise.resolve(empty);
 
-            // 3. Add Family Query
-            if(myFamilyId) {
-                queries.push(db.collection('documents').where('familyId', '==', myFamilyId).get());
-            }
+            // 3. Execute All
+            const [ownedRes, sharedRes, familyRes] = await Promise.all([ownedQ, sharedQ, familyQ]);
 
-            // 4. Execute All
-            const results = await Promise.all(queries);
-
-            const ownedDocs = results[0].docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'OWNER' }));
-            const sharedDocs = results[1].docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'SHARED' }));
-            
-            let familyDocs = [];
-            if(results[2]) {
-                familyDocs = results[2].docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'FAMILY' }));
-            }
+            const ownedDocs = ownedRes.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'OWNER' }));
+            const sharedDocs = sharedRes.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'SHARED' }));
+            const familyDocs = familyRes.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'FAMILY' }));
 
             // 5. Merge & Deduplicate
             const combined = [...ownedDocs, ...sharedDocs, ...familyDocs];
@@ -131,14 +136,14 @@ function renderDocs(docs) {
         if (doc.type === 'SHARED') badge = `<span class="status-badge" style="background: #EFF6FF; color: #1d4ed8;">SHARED IN</span>`;
         if (doc.type === 'FAMILY') badge = `<span class="status-badge" style="background: #faf5ff; color: #7e22ce;">FAMILY</span>`;
 
-        const downloadBtn = `
-            <a href="${doc.fileData}" download="${doc.fileName}" class="btn-tab">
+        const downloadBtn = !isSafeDataUrl(doc.fileData) ? `<span class="btn-tab" style="opacity:.5;">Unavailable</span>` : `
+            <a href="${doc.fileData}" download="${escapeHtml(doc.fileName)}" class="btn-tab">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 <span class="expandable-tab-text">Download</span>
             </a>`;
             
         const deleteBtn = (doc.type === 'OWNER') 
-            ? `<button onclick="deleteDoc('${doc.id}')" class="btn-tab btn-tab-danger">
+            ? `<button data-delete="1" class="btn-tab btn-tab-danger">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 <span class="expandable-tab-text">Delete</span>
             </button>`
@@ -149,8 +154,8 @@ function renderDocs(docs) {
                 <div style="display:flex; gap: 12px; align-items:center;">
                     <div style="padding:10px; background:var(--gov-canvas); border-radius:12px;">${icon}</div>
                     <div>
-                        <h3 style="font-size: 1rem; font-weight: 600; color: var(--gov-navy);">${doc.fileName}</h3>
-                        <p style="font-size: 0.8rem; color: var(--gov-slate); margin-top:2px;">${doc.category} &bull; ${dateStr}</p>
+                        <h3 style="font-size: 1rem; font-weight: 600; color: var(--gov-navy);">${escapeHtml(doc.fileName)}</h3>
+                        <p style="font-size: 0.8rem; color: var(--gov-slate); margin-top:2px;">${escapeHtml(doc.category)} &bull; ${dateStr}</p>
                     </div>
                 </div>
                 ${badge}
@@ -161,6 +166,8 @@ function renderDocs(docs) {
                 ${deleteBtn}
             </div>
         `;
+        const delBtn = div.querySelector('[data-delete]');
+        if (delBtn) delBtn.addEventListener('click', () => window.deleteDoc(doc.id));
         docGrid.appendChild(div);
     });
 }
@@ -169,7 +176,7 @@ function filterDocs() {
     const query = searchBar.value.toLowerCase();
     const cat = categoryFilter.value;
     const filtered = allDocs.filter(doc => {
-        return doc.fileName.toLowerCase().includes(query) && (cat === 'all' || doc.category === cat);
+        return String(doc.fileName || '').toLowerCase().includes(query) && (cat === 'all' || doc.category === cat);
     });
     renderDocs(filtered);
 }

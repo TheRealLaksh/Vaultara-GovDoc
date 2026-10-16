@@ -36,11 +36,11 @@ auth.onAuthStateChanged(user => {
                             </td>
                             <td style="padding: 16px;">
                                 <span class="status-badge" style="background:var(--gov-canvas); color:var(--gov-navy); border: 1px solid var(--gov-silver);">
-                                    ${data.action}
+                                    ${escapeHtml(data.action)}
                                 </span>
                             </td>
                             <td style="padding: 16px; color: var(--gov-graphite); font-weight: 500;">
-                                ${data.description}
+                                ${escapeHtml(data.description)}
                             </td>
                         </tr>
                     `;

@@ -7,7 +7,7 @@ const Logger = {
             await db.collection('logs').add({
                 userId: user.uid,
                 action: action,
-                description: description,
+                description: String(description).slice(0, 300),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             console.log(`[LOGGED]: ${action} - ${description}`);
