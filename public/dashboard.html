@@ -3,95 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Vaultara</title>
+    <meta name="theme-color" content="#F6F3EC">
+    <title>Your vault | Vaultara</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+    <link rel="stylesheet" href="vendor/phosphor/style.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <a href="#main" class="skip-link">Skip to content</a>
 
-    <div class="app-layout">
-        <aside class="sidebar">
-            <div>
-                <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 40px; display:flex; align-items:center; gap:8px;">
-                    🔐 Vaultara
-                </div>
-                <nav style="display:flex; flex-direction:column; gap:8px;">
-                    <a href="dashboard.html" class="btn-tab active">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                        <span class="expandable-tab-text">Overview</span>
-                    </a>
-                    <a href="upload.html" class="btn-tab">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                        <span class="expandable-tab-text">Upload</span>
-                    </a>
-                    <a href="share.html" class="btn-tab">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                        <span class="expandable-tab-text">Share</span>
-                    </a>
-                    <a href="activity.html" class="btn-tab">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        <span class="expandable-tab-text">History</span>
-                    </a>
-                    <a href="profile.html" class="btn-tab">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span class="expandable-tab-text">Profile</span>
-                    </a>
-                </nav>
-            </div>
-            
-            <button onclick="logout()" class="btn-tab btn-tab-danger" style="margin-top:auto;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                <span class="expandable-tab-text">Sign Out</span>
-            </button>
-        </aside>
+    <div class="app">
+        <aside class="sidebar" id="sidebar"></aside>
 
-        <main class="main-content">
-            <div id="verifyBanner" class="hidden" style="background: #fffbeb; border: 1px solid #fcd34d; padding: 16px; border-radius: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <div style="background:#f59e0b; color:white; padding:8px; border-radius:50%;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <main class="main" id="main">
+            <div class="main-inner">
+                <div id="verifyBanner" class="banner hidden" role="status">
+                    <div class="banner-text">
+                        <i class="ph-bold ph-warning" aria-hidden="true"></i>
+                        <div>
+                            <strong>Verify your email</strong>
+                            <p>Documents shared with you and your family only appear once your email is verified.</p>
+                        </div>
                     </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="sendVerification()">Send link</button>
+                </div>
+
+                <header class="page-head reveal">
                     <div>
-                        <h4 style="font-size: 0.95rem; margin:0; color: #92400e;">Action Required: Verify Email</h4>
-                        <p style="font-size: 0.85rem; margin:0; color: #b45309;">Verify your email to enable full sharing features.</p>
+                        <h1>Your vault</h1>
+                        <p>Everything you own, plus what family and friends have shared with you.</p>
                     </div>
-                </div>
-                <button onclick="sendVerification()" class="btn-tab" style="background: white; border: 1px solid #fcd34d; color: #d97706;">
-                    Send Link
-                </button>
-            </div>
+                    <div class="page-stat">
+                        <div class="page-count" id="docCountDisplay" aria-live="polite">0</div>
+                        <div class="hint" id="docCountLabel">documents</div>
+                    </div>
+                </header>
 
-            <header style="margin-bottom: 32px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <h1 style="font-size: 1.75rem; font-weight: 700;">My Vault</h1>
-                    <p style="color: var(--gov-slate);">Securely managed documents.</p>
-                </div>
-                <div id="docCountDisplay" style="font-size: 2rem; font-weight: 800; color: var(--gov-navy-light);">--</div>
-            </header>
-
-            <div class="ui-card anim-stagger-1" style="margin-bottom: 32px; padding: 16px;">
-                <div class="grid-2">
-                    <input type="text" id="searchBar" placeholder="Search by name...">
-                    <select id="categoryFilter">
-                        <option value="all">All Categories</option>
+                <div class="toolbar reveal reveal-1">
+                    <div class="field-inline has-icon">
+                        <i class="ph-bold ph-magnifying-glass" aria-hidden="true"></i>
+                        <input type="text" id="searchBar" name="q" placeholder="Search by name…" aria-label="Search documents" autocomplete="off">
+                    </div>
+                    <select id="categoryFilter" name="category" aria-label="Filter by category">
+                        <option value="all">All categories</option>
                         <option value="Identity">Identity</option>
                         <option value="Education">Education</option>
                         <option value="Health">Health</option>
                     </select>
                 </div>
-            </div>
 
-            <div id="docLoader" class="loader-pulse" style="text-align:center; padding:40px; color:var(--gov-slate);">Syncing Vault...</div>
-            
-            <div id="docGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
+                <div id="docGrid" class="doc-grid" aria-busy="true" aria-live="polite">
+                    <div class="skeleton" aria-hidden="true"></div>
+                    <div class="skeleton" aria-hidden="true"></div>
+                    <div class="skeleton" aria-hidden="true"></div>
                 </div>
+            </div>
         </main>
 
-        <nav class="mobile-nav">
-            <a href="dashboard.html" class="btn-tab active"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Home</a>
-            <a href="upload.html" class="btn-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Add</a>
-            <a href="share.html" class="btn-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</a>
-            <a href="profile.html" class="btn-tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Me</a>
-        </nav>
+        <nav class="mobile-nav" id="mobileNav"></nav>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -101,7 +73,7 @@
     <script src="js/utils.js"></script>
     <script src="js/logger.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/shell.js"></script>
     <script src="js/dashboard.js"></script>
-    <script src="js/otp.js"></script> 
 </body>
 </html>

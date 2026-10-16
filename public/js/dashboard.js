@@ -1,197 +1,223 @@
 checkAuth();
 
 const docGrid = document.getElementById('docGrid');
-const loader = document.getElementById('docLoader');
 const searchBar = document.getElementById('searchBar');
 const categoryFilter = document.getElementById('categoryFilter');
 const docCountDisplay = document.getElementById('docCountDisplay');
+const docCountLabel = document.getElementById('docCountLabel');
 const verifyBanner = document.getElementById('verifyBanner');
 
 let allDocs = [];
 
+const CATEGORY_ICONS = { Identity: 'identification-card', Education: 'graduation-cap', Health: 'heartbeat' };
+const ACCESS = {
+    OWNER: { cls: 'badge-owner', label: 'Yours', icon: 'lock-simple' },
+    SHARED: { cls: 'badge-shared', label: 'Shared with you', icon: 'share-network' },
+    FAMILY: { cls: 'badge-family', label: 'Family', icon: 'users-three' },
+};
+
 // Verification Logic
 window.sendVerification = async () => {
     const user = auth.currentUser;
-    if(user) {
-        try {
-            await user.sendEmailVerification();
-            alert(`Verification link sent to ${user.email}. Please check your inbox (and spam).`);
-        } catch (error) {
-            console.error(error);
-            alert("Error sending link: " + error.message);
-        }
+    if (!user) return;
+    try {
+        await user.sendEmailVerification();
+        toast(`Verification link sent to ${user.email}. Check your inbox and spam folder.`);
+    } catch (error) {
+        console.error(error);
+        toast('Could not send the link. Please try again in a minute.', 'error');
     }
 };
 
 auth.onAuthStateChanged(async user => {
-    if (user) {
-        const myEmail = (user.email || '').toLowerCase(); 
-        
-        // CHECK VERIFICATION STATUS
-        if (!user.emailVerified && verifyBanner) {
-            verifyBanner.classList.remove('hidden');
-            verifyBanner.style.display = 'flex'; // Enforce flex
-        } else if (verifyBanner) {
-            verifyBanner.classList.add('hidden');
-        }
+    if (!user) return;
+    const myEmail = (user.email || '').toLowerCase();
 
-        try {
-            // Shared and family access need a verified email (enforced by the security rules).
-            // After clicking the email link, refresh the token so the rules see the change.
-            if (!user.emailVerified) {
-                await user.reload();
-                if (user.emailVerified) {
-                    await user.getIdToken(true);
-                    if (verifyBanner) verifyBanner.classList.add('hidden');
-                }
+    // CHECK VERIFICATION STATUS
+    if (verifyBanner) verifyBanner.classList.toggle('hidden', user.emailVerified);
+
+    try {
+        // Shared and family access need a verified email (enforced by the security rules).
+        // After clicking the email link, refresh the token so the rules see the change.
+        if (!user.emailVerified) {
+            await user.reload();
+            if (user.emailVerified) {
+                await user.getIdToken(true);
+                if (verifyBanner) verifyBanner.classList.add('hidden');
             }
-
-            // 1. Get User Profile for Family ID
-            let myFamilyId = null;
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if(userDoc.exists) myFamilyId = userDoc.data().familyId;
-
-            // 2. Owned documents always; shared + family only for verified accounts
-            const empty = { docs: [] };
-            const ownedQ = db.collection('documents').where('ownerId', '==', user.uid).get();
-            const sharedQ = user.emailVerified
-                ? db.collection('documents').where('sharedWith', 'array-contains', myEmail).get()
-                : Promise.resolve(empty);
-            const familyQ = (user.emailVerified && myFamilyId && isValidFamilyId(myFamilyId))
-                ? db.collection('documents').where('familyId', '==', myFamilyId).get()
-                : Promise.resolve(empty);
-
-            // 3. Execute All
-            const [ownedRes, sharedRes, familyRes] = await Promise.all([ownedQ, sharedQ, familyQ]);
-
-            const ownedDocs = ownedRes.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'OWNER' }));
-            const sharedDocs = sharedRes.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'SHARED' }));
-            const familyDocs = familyRes.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'FAMILY' }));
-
-            // 5. Merge & Deduplicate
-            const combined = [...ownedDocs, ...sharedDocs, ...familyDocs];
-            const uniqueMap = new Map();
-            
-            combined.forEach(doc => {
-                if(!uniqueMap.has(doc.id)) {
-                    if(doc.type === 'FAMILY' && doc.ownerId === user.uid) {
-                        doc.type = 'OWNER';
-                    }
-                    uniqueMap.set(doc.id, doc);
-                }
-            });
-
-            allDocs = Array.from(uniqueMap.values()).sort((a,b) => {
-                const dateA = a.createdAt ? a.createdAt.toMillis() : 0;
-                const dateB = b.createdAt ? b.createdAt.toMillis() : 0;
-                return dateB - dateA;
-            });
-            
-            renderDocs(allDocs);
-            if(loader) loader.classList.add('hidden');
-            if(docCountDisplay) docCountDisplay.innerText = allDocs.length;
-
-        } catch (error) {
-            console.error("Error loading docs:", error);
-            if(loader) loader.innerHTML = "<p>Error syncing vault.</p>";
         }
+
+        // 1. Get User Profile for Family ID
+        let myFamilyId = null;
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) myFamilyId = userDoc.data().familyId;
+
+        // 2. Owned documents always; shared + family only for verified accounts
+        const empty = { docs: [] };
+        const ownedQ = db.collection('documents').where('ownerId', '==', user.uid).get();
+        const sharedQ = user.emailVerified
+            ? db.collection('documents').where('sharedWith', 'array-contains', myEmail).get()
+            : Promise.resolve(empty);
+        const familyQ = (user.emailVerified && myFamilyId && isValidFamilyId(myFamilyId))
+            ? db.collection('documents').where('familyId', '==', myFamilyId).get()
+            : Promise.resolve(empty);
+
+        // 3. Execute All
+        const [ownedRes, sharedRes, familyRes] = await Promise.all([ownedQ, sharedQ, familyQ]);
+
+        const ownedDocs = ownedRes.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'OWNER' }));
+        const sharedDocs = sharedRes.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'SHARED' }));
+        const familyDocs = familyRes.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'FAMILY' }));
+
+        // 4. Merge & deduplicate
+        const uniqueMap = new Map();
+        [...ownedDocs, ...sharedDocs, ...familyDocs].forEach(doc => {
+            if (!uniqueMap.has(doc.id)) {
+                if (doc.type === 'FAMILY' && doc.ownerId === user.uid) doc.type = 'OWNER';
+                uniqueMap.set(doc.id, doc);
+            }
+        });
+
+        allDocs = Array.from(uniqueMap.values()).sort((a, b) => {
+            const dateA = a.createdAt ? a.createdAt.toMillis() : 0;
+            const dateB = b.createdAt ? b.createdAt.toMillis() : 0;
+            return dateB - dateA;
+        });
+
+        updateCount();
+        filterDocs();
+    } catch (error) {
+        console.error('Error loading docs:', error);
+        renderError();
     }
 });
 
-function renderDocs(docs) {
-    if(!docGrid) return;
+function updateCount() {
+    if (docCountDisplay) docCountDisplay.textContent = allDocs.length;
+    if (docCountLabel) docCountLabel.textContent = allDocs.length === 1 ? 'document' : 'documents';
+}
+
+function renderError() {
+    if (!docGrid) return;
+    docGrid.innerHTML = `
+        <div class="empty" role="alert">
+            <i class="ph-bold ph-warning-circle" aria-hidden="true"></i>
+            <h2>We could not load your vault</h2>
+            <p>Check your connection and try again. If it keeps happening, sign out and back in.</p>
+            <button type="button" class="btn btn-secondary" onclick="location.reload()">Try again</button>
+        </div>`;
+}
+
+function renderEmpty(filtered) {
+    docGrid.innerHTML = filtered
+        ? `<div class="empty">
+               <i class="ph-bold ph-magnifying-glass" aria-hidden="true"></i>
+               <h2>No documents match</h2>
+               <p>Try a different name or choose All categories.</p>
+           </div>`
+        : `<div class="empty">
+               <i class="ph-bold ph-folder-open" aria-hidden="true"></i>
+               <h2>Your vault is empty</h2>
+               <p>Upload a PDF, JPEG or PNG up to 500 KB. You decide later who else can see it.</p>
+               <a href="upload.html" class="btn btn-primary"><i class="ph-bold ph-upload-simple" aria-hidden="true"></i>Upload your first document</a>
+           </div>`;
+}
+
+function renderDocs(docs, filtered = false) {
+    if (!docGrid) return;
+    docGrid.setAttribute('aria-busy', 'false');
     docGrid.innerHTML = '';
-    
+
     if (docs.length === 0) {
-        docGrid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 60px;">
-                <p style="color: var(--gov-slate); margin-bottom: 20px;">Secure Vault is empty.</p>
-                <div style="display:flex; justify-content:center;">
-                    <a href="upload.html" class="btn-primary-reveal" style="width: auto;">
-                        <span class="btn-text-initial">Upload Document</span>
-                        <div class="btn-bg-reveal"></div>
-                        <div class="btn-text-reveal">
-                            <span>Upload Now</span>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                        </div>
-                    </a>
-                </div>
-            </div>`;
+        renderEmpty(filtered);
         return;
     }
 
-    let delayCounter = 0;
+    docs.forEach((doc, index) => {
+        const card = document.createElement('article');
+        card.className = 'doc-card';
+        card.style.setProperty('--i', Math.min(index, 12));
 
-    docs.forEach(doc => {
-        const div = document.createElement('div');
-        div.className = 'ui-card anim-stagger-' + ((delayCounter++ % 3) + 1);
-        
-        const dateStr = doc.createdAt ? formatDate(doc.createdAt) : 'Processing...';
-        
-        let icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
-        if(doc.category === 'Health') icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
-        if(doc.category === 'Identity') icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+        const access = ACCESS[doc.type] || ACCESS.OWNER;
+        const cat = CATEGORY_ICONS[doc.category] ? doc.category : '';
+        const icon = CATEGORY_ICONS[doc.category] || 'file-text';
+        const name = escapeHtml(doc.fileName);
 
-        let badge = `<span class="status-badge" style="background: #f0fdf4; color: #15803d;">SECURE</span>`;
-        if (doc.type === 'SHARED') badge = `<span class="status-badge" style="background: #EFF6FF; color: #1d4ed8;">SHARED IN</span>`;
-        if (doc.type === 'FAMILY') badge = `<span class="status-badge" style="background: #faf5ff; color: #7e22ce;">FAMILY</span>`;
+        const download = isSafeDataUrl(doc.fileData)
+            ? `<a href="${doc.fileData}" download="${name}" class="btn btn-ghost btn-sm" aria-label="Download ${name}">
+                   <i class="ph-bold ph-download-simple" aria-hidden="true"></i>Download</a>`
+            : `<span class="badge badge-warn">File unavailable</span>`;
 
-        const downloadBtn = !isSafeDataUrl(doc.fileData) ? `<span class="btn-tab" style="opacity:.5;">Unavailable</span>` : `
-            <a href="${doc.fileData}" download="${escapeHtml(doc.fileName)}" class="btn-tab">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                <span class="expandable-tab-text">Download</span>
-            </a>`;
-            
-        const deleteBtn = (doc.type === 'OWNER') 
-            ? `<button data-delete="1" class="btn-tab btn-tab-danger">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                <span class="expandable-tab-text">Delete</span>
-            </button>`
-            : ``;
+        const remove = doc.type === 'OWNER'
+            ? `<button type="button" class="btn btn-danger-ghost btn-sm btn-icon" data-delete="1" aria-label="Delete ${name}" title="Delete">
+                   <i class="ph-bold ph-trash" aria-hidden="true"></i></button>`
+            : '';
 
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px;">
-                <div style="display:flex; gap: 12px; align-items:center;">
-                    <div style="padding:10px; background:var(--gov-canvas); border-radius:12px;">${icon}</div>
-                    <div>
-                        <h3 style="font-size: 1rem; font-weight: 600; color: var(--gov-navy);">${escapeHtml(doc.fileName)}</h3>
-                        <p style="font-size: 0.8rem; color: var(--gov-slate); margin-top:2px;">${escapeHtml(doc.category)} &bull; ${dateStr}</p>
-                    </div>
+        card.innerHTML = `
+            <div class="doc-top">
+                <div class="doc-tile" data-cat="${cat}"><i class="ph-bold ph-${icon}" aria-hidden="true"></i></div>
+                <div>
+                    <h2 class="doc-title">${name}</h2>
+                    <p class="doc-meta">${escapeHtml(doc.category || 'Document')} &middot; ${formatDay(doc.createdAt)}</p>
                 </div>
-                ${badge}
             </div>
-            <div style="display:flex; gap: 8px; border-top: 1px solid var(--gov-silver); padding-top: 16px;">
-                ${downloadBtn}
-                <div style="flex-grow:1"></div>
-                ${deleteBtn}
-            </div>
-        `;
-        const delBtn = div.querySelector('[data-delete]');
-        if (delBtn) delBtn.addEventListener('click', () => window.deleteDoc(doc.id));
-        docGrid.appendChild(div);
+            <div class="doc-foot">
+                <span class="badge ${access.cls}"><i class="ph-bold ph-${access.icon}" aria-hidden="true"></i>${access.label}</span>
+                <div class="doc-actions">${download}${remove}</div>
+            </div>`;
+
+        const del = card.querySelector('[data-delete]');
+        if (del) del.addEventListener('click', () => window.deleteDoc(doc.id));
+        docGrid.appendChild(card);
     });
+}
+
+// Keep the search and category in the URL so a filtered view can be bookmarked or shared.
+function syncUrl(query, cat) {
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (cat !== 'all') params.set('category', cat);
+    const qs = params.toString();
+    history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
 }
 
 function filterDocs() {
-    const query = searchBar.value.toLowerCase();
+    const query = searchBar.value.trim().toLowerCase();
     const cat = categoryFilter.value;
-    const filtered = allDocs.filter(doc => {
-        return String(doc.fileName || '').toLowerCase().includes(query) && (cat === 'all' || doc.category === cat);
-    });
-    renderDocs(filtered);
+    syncUrl(searchBar.value.trim(), cat);
+    const filtered = allDocs.filter(doc =>
+        String(doc.fileName || '').toLowerCase().includes(query) && (cat === 'all' || doc.category === cat));
+    renderDocs(filtered, Boolean(query) || cat !== 'all');
 }
 
-if(searchBar) searchBar.addEventListener('input', filterDocs);
-if(categoryFilter) categoryFilter.addEventListener('change', filterDocs);
+// Restore filters from the URL
+(() => {
+    const params = new URLSearchParams(location.search);
+    if (searchBar && params.get('q')) searchBar.value = params.get('q');
+    if (categoryFilter && ['Identity', 'Education', 'Health'].includes(params.get('category'))) categoryFilter.value = params.get('category');
+})();
+
+if (searchBar) searchBar.addEventListener('input', filterDocs);
+if (categoryFilter) categoryFilter.addEventListener('change', filterDocs);
 
 window.deleteDoc = async (docId) => {
-    if(!confirm("Are you sure you want to remove this document from the vault?")) return;
+    const doc = allDocs.find(d => d.id === docId);
+    const ok = await confirmDialog({
+        title: 'Delete this document?',
+        message: `${doc ? `"${doc.fileName}" will be` : 'It will be'} removed from your vault and from anyone it was shared with. This cannot be undone.`,
+        confirmLabel: 'Delete',
+        danger: true,
+    });
+    if (!ok) return;
     try {
         await db.collection('documents').doc(docId).delete();
-        if(window.Logger) await Logger.log("DELETE", `Deleted doc: ${docId}`);
-        window.location.reload();
+        if (window.Logger) await Logger.log('DELETE', `Deleted '${doc ? doc.fileName : docId}'`);
+        allDocs = allDocs.filter(d => d.id !== docId);
+        updateCount();
+        filterDocs();
+        toast('Document deleted.');
     } catch (e) {
         console.error(e);
-        alert("Delete failed.");
+        toast('Delete failed. Please try again.', 'error');
     }
 };
