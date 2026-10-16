@@ -15,9 +15,17 @@ Privacy-first citizen document vault (Dec 2025 beta). Vanilla JS front end in `p
 - No build step, no tests in repo.
 
 ## Code map
-- `public/*.html`: index, login (login + register), dashboard, upload, share, profile, activity.
-- `public/js/`: `otp.js` (login/register), `auth.js` (logout, nav), `dashboard.js` (3 queries: owned, shared via `sharedWith` array-contains email, family via `familyId`), `upload.js`, `share.js`, `profile.js` (Family ID), `activity.js` + `logger.js` (audit `logs`), `utils.js`.
+- `public/*.html`: index (landing), login (sign in + create account, one form), dashboard, upload, share, profile, activity.
+- `public/js/`: `otp.js` (auth form), `auth.js` (logout), `shell.js` (builds sidebar and mobile nav on every signed-in page), `dashboard.js` (3 queries: owned, shared via `sharedWith` array-contains email, family via `familyId`; filters kept in the URL), `upload.js`, `share.js`, `profile.js` (Family ID), `activity.js` + `logger.js` (audit `logs`), `utils.js` (escapeHtml, Family ID helpers, `toast`, `confirmDialog`, `setStatus`), `landing.js` (scroll reveal, hero motion pause).
+- `public/css/style.css` (design system + app), `public/css/landing.css` (landing only). `public/vendor/phosphor/` = self-hosted Phosphor Bold icons (MIT). `public/favicon.svg`.
 - `firestore.rules`, `firestore.indexes.json`, `firebase.json`.
+
+## Design system ("warm paper", redesigned 16 Oct 2026)
+- Direction chosen by Laksh via poll: warm paper editorial, slim left sidebar, proper one-page landing.
+- Tokens in `:root` of `style.css`: paper `#F6F3EC`, sidebar `#EEEAE0`, ink `#1E1C18`, one accent deep green `#1F5C46`, pastel tints per category (Identity blue, Education yellow, Health rose, Family lilac). Fonts: Newsreader (display) + Geist (UI) from Google Fonts; icons Phosphor Bold. No emoji, no gradients, no glows, no shadows at rest. Sentence case copy.
+- Hero background: 8 flat document sheets drifting slowly (CSS transform only), has a Pause control, stops under `prefers-reduced-motion`.
+- Skills used: taste-skill (installed in the project at `.claude/skills` and `.agents`, excluded from git via `.git/info/exclude`), ui-ux-pro-max, web-design-guidelines. `inspect.mjs` on the landing page: 0 FAIL, 4 WARN (cream palette = chosen direction; font-size count; no photos/footage = animation used instead).
+- Preview without a real account: a throwaway stub server lives in the Claude scratchpad (serves `public/` on :5001 with a fake signed-in user and sample documents; query flags ?unverified=1 ?empty=1 ?legacyfam=1 ?fail=1). Not part of the repo.
 
 ## Status (16 Oct 2026)
 - Full audit done, see `AUDIT.md` (12 findings: 2 critical, 3 high, 3 medium).
@@ -26,7 +34,8 @@ Privacy-first citizen document vault (Dec 2025 beta). Vanilla JS front end in `p
 - `firestore.rules` rewritten (owner / shared / family, verified email, field allow-lists, append-only logs) and passed 50 emulator tests (test file kept outside the repo, in the Claude scratchpad).
 - `firestore.indexes.json` now has the `logs` (userId, timestamp desc) index the Activity page needs.
 - APPLIED to the live project 16 Oct 2026 (Laksh approved): new Firestore rules published (release 'Today 11:34 am'); `logs` (userId asc, timestamp desc) composite index created (was still Building when last checked); password policy set to Require enforcement, min length 8. Still open: API key website restriction (needs final domain), App Check, Hosting + headers.
-- Login/register/upload/share not tested end to end in a browser (needs a throwaway account; ask Laksh first).
+- Full UI redesign done 16 Oct 2026 (see Design system). All screens checked at 1440 and 390 wide against a stub, plus the real login page and auth redirect against the real project. Login/register/upload/share still not tested end to end with a real account (Claude may not create accounts; ask Laksh).
+- Fixed along the way: profile Family ID input had `maxlength="10"`, which would have cut the new 20-character IDs (now 36).
 
 ## Next steps
 1. Laksh registers/signs in a throwaway account himself on http://localhost:5000 (Claude may not create accounts or type passwords, since Firebase Auth is not local), then Claude drives upload, share, family link, delete via Claude in Chrome. Nothing has been run end to end yet ( old test users have 4-digit Family IDs that no longer grant access, and need a new one from Profile > Generate).
@@ -49,3 +58,4 @@ Privacy-first citizen document vault (Dec 2025 beta). Vanilla JS front end in `p
 - 2026-10-16 (later still): Laksh approved console changes; published rules, created logs index, set password policy (enforced, min 8).
 - 2026-10-16 (end): re-read the live rules in the console and confirmed the active release matches firestore.rules (same 116 lines). Did not create a test account (policy: not allowed for Claude); end-to-end test waits for Laksh to sign in.
 - 2026-10-16 (final): committed in 6 topic commits and pushed to main (Laksh chose small commits + push). No auto-deploy, so nothing went live from the push.
+- 2026-10-16 (redesign): whole UI redesigned (warm paper system, app shell, landing page with animated document-sheet hero background, toasts and confirm dialog instead of alert/confirm, skeleton/empty/error states, filters in URL, Phosphor icons self-hosted). Committed locally in topic commits; push waits for Laksh's OK.
