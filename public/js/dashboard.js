@@ -44,10 +44,13 @@ auth.onAuthStateChanged(async user => {
         // After clicking the email link, refresh the token so the rules see the change.
         if (!user.emailVerified) {
             await user.reload();
-            if (user.emailVerified) {
-                await user.getIdToken(true);
-                if (verifyBanner) verifyBanner.classList.add('hidden');
-            }
+            if (user.emailVerified && verifyBanner) verifyBanner.classList.add('hidden');
+        }
+        // The rules read email_verified from the ID token, which can be stale if the email was
+        // verified after the token was issued. Refresh it once when the claim disagrees.
+        if (user.emailVerified) {
+            const { claims } = await user.getIdTokenResult();
+            if (!claims.email_verified) await user.getIdToken(true);
         }
 
         // 1. Get User Profile for Family ID
@@ -56,13 +59,15 @@ auth.onAuthStateChanged(async user => {
         if (userDoc.exists) myFamilyId = userDoc.data().familyId;
 
         // 2. Owned documents always; shared + family only for verified accounts
+        // A failed shared/family query must not hide the user's own documents.
         const empty = { docs: [] };
+        const soft = (label) => (err) => { console.warn(`${label} query failed`, err.code || err); return empty; };
         const ownedQ = db.collection('documents').where('ownerId', '==', user.uid).get();
         const sharedQ = user.emailVerified
-            ? db.collection('documents').where('sharedWith', 'array-contains', myEmail).get()
+            ? db.collection('documents').where('sharedWith', 'array-contains', myEmail).get().catch(soft('Shared'))
             : Promise.resolve(empty);
         const familyQ = (user.emailVerified && myFamilyId && isValidFamilyId(myFamilyId))
-            ? db.collection('documents').where('familyId', '==', myFamilyId).get()
+            ? db.collection('documents').where('familyId', '==', myFamilyId).get().catch(soft('Family'))
             : Promise.resolve(empty);
 
         // 3. Execute All
