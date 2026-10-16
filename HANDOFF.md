@@ -22,7 +22,7 @@ Privacy-first citizen document vault (Dec 2025 beta). Vanilla JS front end in `p
 ## Status (16 Oct 2026)
 - Full audit done, see `AUDIT.md` (12 findings: 2 critical, 3 high, 3 medium).
 - Local config restored; Firebase initialises on the local site, auth guard redirects, no console errors.
-- Code fixes in the working tree, uncommitted: XSS escaping and safe download links, verified-email handling on dashboard, 16-char Family IDs, upload type/size checks, stronger register password and auto verification email, invalid-credential message, lowercase sharing, dead link, firebase.json.
+- Code fixes committed and pushed to main (16 Oct 2026, commits 2c8399f..c2ab2a6): XSS escaping and safe download links, verified-email handling on dashboard, 16-char Family IDs, upload type/size checks, stronger register password and auto verification email, invalid-credential message, lowercase sharing, dead link, firebase.json.
 - `firestore.rules` rewritten (owner / shared / family, verified email, field allow-lists, append-only logs) and passed 50 emulator tests (test file kept outside the repo, in the Claude scratchpad).
 - `firestore.indexes.json` now has the `logs` (userId, timestamp desc) index the Activity page needs.
 - APPLIED to the live project 16 Oct 2026 (Laksh approved): new Firestore rules published (release 'Today 11:34 am'); `logs` (userId asc, timestamp desc) composite index created (was still Building when last checked); password policy set to Require enforcement, min length 8. Still open: API key website restriction (needs final domain), App Check, Hosting + headers.
@@ -31,7 +31,7 @@ Privacy-first citizen document vault (Dec 2025 beta). Vanilla JS front end in `p
 ## Next steps
 1. Laksh registers/signs in a throwaway account himself on http://localhost:5000 (Claude may not create accounts or type passwords, since Firebase Auth is not local), then Claude drives upload, share, family link, delete via Claude in Chrome. Nothing has been run end to end yet ( old test users have 4-digit Family IDs that no longer grant access, and need a new one from Profile > Generate).
 2. Check the `logs` index finished building (Firestore > Indexes), then open the Activity page.
-3. Commit the working-tree changes (ask Laksh about small commits first).
+3. (Done) committed in 6 topic commits and pushed to main.
 4. Restrict the API key to the real domain(s); Firebase Hosting deploy with security headers (CSP etc.); App Check.
 5. Replace shared-secret Family IDs with an invite/approve `families` collection.
 
@@ -48,3 +48,4 @@ Privacy-first citizen document vault (Dec 2025 beta). Vanilla JS front end in `p
 - 2026-10-16 (later): full audit (AUDIT.md), rules v2 (50 emulator tests), XSS/validation/verification/Family ID fixes in app code, logs index file. Console changes still pending approval.
 - 2026-10-16 (later still): Laksh approved console changes; published rules, created logs index, set password policy (enforced, min 8).
 - 2026-10-16 (end): re-read the live rules in the console and confirmed the active release matches firestore.rules (same 116 lines). Did not create a test account (policy: not allowed for Claude); end-to-end test waits for Laksh to sign in.
+- 2026-10-16 (final): committed in 6 topic commits and pushed to main (Laksh chose small commits + push). No auto-deploy, so nothing went live from the push.
